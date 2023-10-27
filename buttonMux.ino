@@ -9,70 +9,65 @@ int enableMux1 = 14;
 // common signal
 int muxCommon = A0;
 
+// Array to store the previous state of each button
+int previousButtonState[16] = {0};
+
 void setup() {
   Serial.begin(9600);
-  pinMode(muxCommon, INPUT_PULLUP);  // Enable internal pull-up resistor (makes buttons more stable)
+  pinMode(muxCommon, INPUT_PULLUP);
 
-  // set up signal pins as outputs
   pinMode(signal0, OUTPUT);
   pinMode(signal1, OUTPUT);
   pinMode(signal2, OUTPUT);
 
-  // set up enable pins as outputs
   pinMode(enableMux0, OUTPUT);
   pinMode(enableMux1, OUTPUT);
 }
 
 void loop() {
-  // enableMux(0);
-  // buttonMux();
-  // enableMux(1);
   buttonMux();
 }
 
-
-void handleButton(int i) {
+void handleButtonPress(int i) {
   Serial.print("Button ");
   Serial.print(i);
   Serial.println(" Pressed!");
 }
 
+void handleButtonRelease(int i) {
+  Serial.print("Button ");
+  Serial.print(i);
+  Serial.println(" Released!");
+}
+
 void buttonMux() {
-  const int analogThreshold = 100;  // Adjust as needed
-  // Loop through all the button channels on the mux
+  const int analogThreshold = 100;
+
+  // Loop through all the button channels on the MUX
   for (int i = 0; i < 16; ++i) {
-    // Switch between the two mux and enable and disable accordingly
     // Enable the appropriate MUX
     enableMux(i < 8 ? 0 : 1);
-    // if (i % 2) {
-    //   digitalWrite(enableMux0, HIGH);
-    //   digitalWrite(enableMux1, LOW);
-    // } else {
-    //   digitalWrite(enableMux1, HIGH);
-    //   digitalWrite(enableMux0, LOW);
-    // }
 
     // Control the selector pins based on the binary representation of i
     digitalWrite(signal0, (i & 0x01) ? HIGH : LOW);
     digitalWrite(signal1, (i & 0x02) ? HIGH : LOW);
     digitalWrite(signal2, (i & 0x04) ? HIGH : LOW);
 
-
     // Read the analog value from the selected button
     int buttonValue = analogRead(muxCommon);
 
-    if (buttonValue < analogThreshold) {
-      // Handle the button press
-      handleButton(i);
+    // Check for button press
+    if (buttonValue < analogThreshold && previousButtonState[i] == 0) {
+      // Button is pressed
+      handleButtonPress(i);
+      previousButtonState[i] = 1;
     }
-    // Print the button number and its corresponding analog value
-    // Serial.print("Button ");
-    // Serial.print(i);
-    // Serial.print(": ");
-    // Serial.println(buttonValue);
-
-    // Delay for stability, adjust as needed
-    // delay(100);
+    // Check for button release
+    else if (buttonValue >= analogThreshold && previousButtonState[i] == 1) {
+      // Button is released
+      handleButtonRelease(i);
+      previousButtonState[i] = 0;
+    }
   }
 }
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This Arduino project demonstrates how to interface with multiple buttons using Multiplexer (MUX) modules. The code reads button presses and releases from a matrix of buttons connected through MUX modules. The ultimate goal is to create a MIDI controller by hacking a Guitar Hero controller into a MIDI controller.
+This Arduino project demonstrates how to interface with multiple buttons using Multiplexer (MUX) modules. The code reads button presses and releases from a matrix of buttons connected through MUX modules. The ultimate goal is to create a MIDI controller by hacking into a Guitar Hero controller.
 
 ## Hardware 
 

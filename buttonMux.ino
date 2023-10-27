@@ -6,11 +6,12 @@ int signal2 = 8;
 // enable pins
 int enableMux0 = 16;
 int enableMux1 = 14;
+int enableMux2 = 10; 
 // common signal
 int muxCommon = A0;
 
 // Array to store the previous state of each button
-int previousButtonState[16] = {0};
+int previousButtonState[24] = { 0 };  // Updated array size
 
 void setup() {
   Serial.begin(9600);
@@ -22,6 +23,7 @@ void setup() {
 
   pinMode(enableMux0, OUTPUT);
   pinMode(enableMux1, OUTPUT);
+  pinMode(enableMux2, OUTPUT);
 }
 
 void loop() {
@@ -44,9 +46,9 @@ void buttonMux() {
   const int analogThreshold = 100;
 
   // Loop through all the button channels on the MUX
-  for (int i = 0; i < 16; ++i) {
+  for (int i = 0; i < 24; ++i) {
     // Enable the appropriate MUX
-    enableMux(i < 8 ? 0 : 1);
+    enableMux(i < 8 ? 0 : (i < 16 ? 1 : 2));
 
     // Control the selector pins based on the binary representation of i
     digitalWrite(signal0, (i & 0x01) ? HIGH : LOW);
@@ -72,11 +74,21 @@ void buttonMux() {
 }
 
 void enableMux(int mux) {
-  if (mux == 0) {
-    digitalWrite(enableMux0, LOW);
-    digitalWrite(enableMux1, HIGH);
-  } else {
-    digitalWrite(enableMux0, HIGH);
-    digitalWrite(enableMux1, LOW);
+  switch (mux) {
+    case 0:
+      digitalWrite(enableMux0, LOW);
+      digitalWrite(enableMux1, HIGH);
+      digitalWrite(enableMux2, HIGH);
+      break;
+    case 1:
+      digitalWrite(enableMux0, HIGH);
+      digitalWrite(enableMux1, LOW);
+      digitalWrite(enableMux2, HIGH);
+      break;
+    case 2:
+      digitalWrite(enableMux0, HIGH);
+      digitalWrite(enableMux1, HIGH);
+      digitalWrite(enableMux2, LOW);
+      break;
   }
 }

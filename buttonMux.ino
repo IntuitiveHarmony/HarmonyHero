@@ -9,14 +9,9 @@ int enableMux1 = 14;
 // common signal
 int muxCommon = A0;
 
-
-
-
-
-
 void setup() {
   Serial.begin(9600);
-  pinMode(muxCommon, INPUT_PULLUP);  // Enable internal pull-up resistor
+  pinMode(muxCommon, INPUT_PULLUP);  // Enable internal pull-up resistor (makes buttons more stable)
 
   // set up signal pins as outputs
   pinMode(signal0, OUTPUT);
@@ -29,9 +24,9 @@ void setup() {
 }
 
 void loop() {
-  enableMux(1);
-  buttonMux();
-  enableMux(0);
+  // enableMux(0);
+  // buttonMux();
+  // enableMux(1);
   buttonMux();
 }
 
@@ -47,6 +42,8 @@ void buttonMux() {
   // Loop through all the button channels on the mux
   for (int i = 0; i < 16; ++i) {
     // Switch between the two mux and enable and disable accordingly
+    // Enable the appropriate MUX
+    enableMux(i < 8 ? 0 : 1);
     // if (i % 2) {
     //   digitalWrite(enableMux0, HIGH);
     //   digitalWrite(enableMux1, LOW);
@@ -59,6 +56,7 @@ void buttonMux() {
     digitalWrite(signal0, (i & 0x01) ? HIGH : LOW);
     digitalWrite(signal1, (i & 0x02) ? HIGH : LOW);
     digitalWrite(signal2, (i & 0x04) ? HIGH : LOW);
+
 
     // Read the analog value from the selected button
     int buttonValue = analogRead(muxCommon);
@@ -80,10 +78,10 @@ void buttonMux() {
 
 void enableMux(int mux) {
   if (mux == 0) {
-    digitalWrite(enableMux0, HIGH);
-    digitalWrite(enableMux1, LOW);
-  } else {
     digitalWrite(enableMux0, LOW);
     digitalWrite(enableMux1, HIGH);
+  } else {
+    digitalWrite(enableMux0, HIGH);
+    digitalWrite(enableMux1, LOW);
   }
 }

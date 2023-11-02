@@ -1,20 +1,50 @@
+#include <Wire.h>
+#include <Adafruit_SSD1306.h>
+
+// Define OLED parameters
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1  // Reset pin not used with Pro Micro
+
+// OLED display address
+#define OLED_I2C_ADDRESS 0x3C
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+// ~~~~~~~~~~~~~~
 // MUX Parameters
+// ~~~~~~~~~~~~~~
 // signal pins
-int signal0 = 4;
-int signal1 = 15;
-int signal2 = 8;
+uint8_t signal0 = 4;
+uint8_t signal1 = 15;
+uint8_t signal2 = 8;
 // enable pins
-int enableMux0 = 16;
-int enableMux1 = 14;
-int enableMux2 = 10; 
+uint8_t enableMux0 = 16;
+uint8_t enableMux1 = 14;
+uint8_t enableMux2 = 10;
 // common signal
-int muxCommon = 7;
+uint8_t muxCommon = 7;
 
 // Array to store the previous state of each button
-int previousButtonState[24] = { 0 };  // Updated array size
+uint8_t previousButtonState[24] = { 0 };  // Updated array size
 
+
+// ~~~~~~~~~~~~~
+// Arduino Setup
+// ~~~~~~~~~~~~~
 void setup() {
   Serial.begin(9600);
+  // Initialize display
+  if (!display.begin(SSD1306_SWITCHCAPVCC, OLED_I2C_ADDRESS)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for (;;)
+      ;
+  }
+  // Set display text size and color
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.clearDisplay();  // Clear the display
+
   pinMode(muxCommon, INPUT_PULLUP);
 
   pinMode(signal0, OUTPUT);
@@ -26,17 +56,32 @@ void setup() {
   pinMode(enableMux2, OUTPUT);
 }
 
+// ~~~~~~~~~~~~
+// Arduino Loop
+// ~~~~~~~~~~~~
 void loop() {
   buttonMux();
 }
 
-void handleButtonPress(int i) {
+// ~~~~~~~~~~~~
+// Button Logic
+// ~~~~~~~~~~~~
+void handleButtonPress(uint8_t i) {
+  display.setCursor(0, 0);
+  display.print(F("Button "));
+  display.setCursor(39, 0);
+  display.print(i);
+  display.setCursor(44, 0);
+  display.print(F(" Pressed!"));
+  display.display();  // Update the display
+
   Serial.print("Button ");
   Serial.print(i);
   Serial.println(" Pressed!");
 }
 
-void handleButtonRelease(int i) {
+void handleButtonRelease(uint8_t i) {
+  // display.display();  // Update the display
   Serial.print("Button ");
   Serial.print(i);
   Serial.println(" Released!");
@@ -44,7 +89,7 @@ void handleButtonRelease(int i) {
 
 void buttonMux() {
   // Loop through all the button channels on the MUX
-  for (int i = 0; i < 24; ++i) {
+  for (uint8_t i = 0; i < 24; ++i) {
     // Enable the appropriate MUX
     enableMux(i < 8 ? 0 : (i < 16 ? 1 : 2));
 
@@ -54,7 +99,7 @@ void buttonMux() {
     digitalWrite(signal2, (i & 0x04) ? HIGH : LOW);
 
     // Read the value from the selected button
-    int buttonValue = digitalRead(muxCommon);
+    uint8_t buttonValue = digitalRead(muxCommon);
     // Serial.println(buttonValue);
 
     // Check for button press
@@ -72,7 +117,7 @@ void buttonMux() {
   }
 }
 
-void enableMux(int mux) {
+void enableMux(uint8_t mux) {
   switch (mux) {
     case 0:
       digitalWrite(enableMux0, LOW);

@@ -1,5 +1,7 @@
-#include <Wire.h>
-#include <Adafruit_SSD1306.h>
+#include <Wire.h>              // For display
+#include <Adafruit_SSD1306.h>  // For display
+
+#include <MIDI.h>  // Add Midi Library
 
 // Define OLED parameters
 #define SCREEN_WIDTH 128
@@ -9,7 +11,11 @@
 // OLED display address
 #define OLED_I2C_ADDRESS 0x3C
 
+// Create instance of display
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+// Create an instance of the library with default name, serial port and settings
+MIDI_CREATE_DEFAULT_INSTANCE();
 
 // ~~~~~~~~~~~~~~
 // MUX Parameters
@@ -45,6 +51,8 @@ void setup() {
   display.setTextColor(SSD1306_WHITE);
   display.clearDisplay();  // Clear the display
 
+
+  MIDI.begin(MIDI_CHANNEL_OMNI);  // Initialize the Midi Library.
   pinMode(muxCommon, INPUT_PULLUP);
 
   pinMode(signal0, OUTPUT);
@@ -67,6 +75,12 @@ void loop() {
 // Button Logic
 // ~~~~~~~~~~~~
 void handleButtonPress(uint8_t i) {
+  byte note = i + 60;
+  byte velocity = 80;
+  byte channel = 14;
+
+  MIDI.sendNoteOn(note, velocity, channel);
+
   display.setCursor(0, 0);
   display.print(F("Button "));
   display.setCursor(39, 0);
@@ -81,7 +95,9 @@ void handleButtonPress(uint8_t i) {
 }
 
 void handleButtonRelease(uint8_t i) {
-  // display.display();  // Update the display
+  MIDI.sendNoteOff(i + 60, 0, 14);
+
+  display.clearDisplay();  // clear the display
   Serial.print("Button ");
   Serial.print(i);
   Serial.println(" Released!");

@@ -31,14 +31,68 @@ uint8_t enableMux2 = 10;
 // common signal
 uint8_t muxCommon = 7;
 
+// ~~~~~~~~~~~~~~~~~~~
+// Selector Parameters
+// ~~~~~~~~~~~~~~~~~~~
+uint8_t selectPot = A1;
+int selection = 0;
+
 // Array to store the previous state of each button
 uint8_t previousButtonState[24] = { 0 };  // Updated array size
+
+// Tuning class to allow for multiple variations
+class Tuning {
+private:
+  byte notes[10] = {};
+
+
+public:
+
+  // constructor
+  Tuning(byte initialNotes[10]) {
+    // Copy the notes from the provided array to the class's notes array
+    memcpy(notes, initialNotes, sizeof(notes));
+  }
+  byte getNote(uint8_t i) {
+    return notes[i];
+  }
+};
+
+
+// Major Pentatonic
+// MIDI notes: C4, D4, E4, F4, G4, A4, B4, C5, D5, E5
+byte notes1[10] = { 60, 62, 64, 65, 67, 69, 71, 72, 74, 76 };
+
+// C Minor Pentatonic
+byte notes2[10] = { 60, 63, 65, 67, 69, 72, 74, 75, 77, 79 };
+
+// Blues Scale
+// MIDI notes: C4, E4, G4, Ab4, A4, C5, D5, F5, G5, Ab5
+byte notes3[10] = { 60, 63, 65, 66, 67, 70, 72, 75, 77, 78 };
+
+// Dorian Scale
+// MIDI notes: C4, D4, E4, F4, G4, A4, B4, C5, D5, E5
+byte notes4[10] = { 60, 62, 63, 65, 67, 69, 71, 72, 74, 76 };
+
+// Mixolydian Scale
+// MIDI notes: C4, D4, E4, F4, G4, A4, B4, C5, D5, E5
+byte notes5[10] = { 60, 62, 64, 65, 67, 69, 71, 72, 74, 76 };
+
+// Array of all the tuning instances available
+Tuning tuningSelection[5] = {
+  Tuning(notes1),
+  Tuning(notes2),
+  Tuning(notes3),
+  Tuning(notes4),
+  Tuning(notes5)
+};
 
 
 // ~~~~~~~~~~~~~
 // Arduino Setup
 // ~~~~~~~~~~~~~
 void setup() {
+
   Serial.begin(9600);
   // Initialize display
   if (!display.begin(SSD1306_SWITCHCAPVCC, OLED_I2C_ADDRESS)) {
@@ -62,12 +116,15 @@ void setup() {
   pinMode(enableMux0, OUTPUT);
   pinMode(enableMux1, OUTPUT);
   pinMode(enableMux2, OUTPUT);
+
+  pinMode(selectPot, INPUT_PULLUP);
 }
 
 // ~~~~~~~~~~~~
 // Arduino Loop
 // ~~~~~~~~~~~~
 void loop() {
+  readPots();
   buttonMux();
 }
 
@@ -75,11 +132,11 @@ void loop() {
 // Button Logic
 // ~~~~~~~~~~~~
 void handleButtonPress(uint8_t i) {
-  byte note = i + 60;
+  byte note = i + 48;
   byte velocity = 80;
   byte channel = 14;
 
-  MIDI.sendNoteOn(note, velocity, channel);
+  MIDI.sendNoteOn(tuningSelection[selection].getNote(i), velocity, channel);
 
   display.setCursor(0, 0);
   display.print(F("Button "));
@@ -95,7 +152,7 @@ void handleButtonPress(uint8_t i) {
 }
 
 void handleButtonRelease(uint8_t i) {
-  MIDI.sendNoteOff(i + 60, 0, 14);
+  MIDI.sendNoteOff(tuningSelection[selection].getNote(i), 0, 14);
 
   display.clearDisplay();  // clear the display
   Serial.print("Button ");
@@ -151,4 +208,10 @@ void enableMux(uint8_t mux) {
       digitalWrite(enableMux2, LOW);
       break;
   }
+}
+
+void readPots() {
+  // Read the "5 way" selection Pot, map it and assign it. -1 to sync with index
+  uint8_t selectVoltage = analogRead(selectPot);
+  selection = map(selectVoltage, 15, 215, 1, 5) - 1;
 }

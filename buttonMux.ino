@@ -45,9 +45,7 @@ class Tuning {
 private:
   byte notes[10] = {};
 
-
 public:
-
   // constructor
   Tuning(byte initialNotes[10]) {
     // Copy the notes from the provided array to the class's notes array
@@ -105,6 +103,8 @@ void setup() {
   display.setTextColor(SSD1306_WHITE);
   display.clearDisplay();  // Clear the display
 
+  readPots();
+  displayTuningChannel();
 
   MIDI.begin(MIDI_CHANNEL_OMNI);  // Initialize the Midi Library.
   pinMode(muxCommon, INPUT_PULLUP);
@@ -125,6 +125,7 @@ void setup() {
 // ~~~~~~~~~~~~
 void loop() {
   readPots();
+  displayTuningChannel();
   buttonMux();
 }
 
@@ -132,32 +133,33 @@ void loop() {
 // Button Logic
 // ~~~~~~~~~~~~
 void handleButtonPress(uint8_t i) {
-  byte note = i + 48;
   byte velocity = 80;
   byte channel = 14;
 
   MIDI.sendNoteOn(tuningSelection[selection].getNote(i), velocity, channel);
 
-  display.setCursor(0, 0);
+  display.setCursor(0, 16);
   display.print(F("Button "));
-  display.setCursor(39, 0);
+  display.setCursor(39, 16);
   display.print(i);
-  display.setCursor(44, 0);
+  display.setCursor(44, 16);
   display.print(F(" Pressed!"));
   display.display();  // Update the display
 
-  Serial.print("Button ");
-  Serial.print(i);
-  Serial.println(" Pressed!");
+  // Serial.print("Button ");
+  // Serial.print(i);
+  // Serial.println(" Pressed!");
 }
 
 void handleButtonRelease(uint8_t i) {
   MIDI.sendNoteOff(tuningSelection[selection].getNote(i), 0, 14);
 
   display.clearDisplay();  // clear the display
-  Serial.print("Button ");
-  Serial.print(i);
-  Serial.println(" Released!");
+
+
+  // Serial.print("Button ");
+  // Serial.print(i);
+  // Serial.println(" Released!");
 }
 
 void buttonMux() {
@@ -210,8 +212,18 @@ void enableMux(uint8_t mux) {
   }
 }
 
+void displayTuningChannel() {
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.print(F("Tuning: "));
+  display.print(selection + 1);
+  display.print(F(" Channel: "));
+  display.print(F("16"));
+  display.display();
+}
+
 void readPots() {
-  // Read the "5 way" selection Pot, map it and assign it. -1 to sync with index
+  // Read the "5 way" selection Pot, map it and assign it. -1 to sync with index of tuningSelection array
   uint8_t selectVoltage = analogRead(selectPot);
   selection = map(selectVoltage, 15, 215, 1, 5) - 1;
 }

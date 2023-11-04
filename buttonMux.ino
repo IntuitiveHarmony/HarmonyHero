@@ -37,7 +37,7 @@ uint8_t muxCommon = 7;
 // Menu Parameters
 // ~~~~~~~~~~~~~~~
 uint8_t menuLED = 6;
-uint8_t menuStep = 0; // 0-Home 1-Channel 2-Notes 3-velocity 4-StrumSwitches
+uint8_t menuStep = 0;  // 0-Home 1-Channel 2-Notes 3-velocity 4-StrumSwitches
 
 // ~~~~~~~~~~~~~~~~~~~
 // Selector Parameters
@@ -270,20 +270,32 @@ void displayTuningChannel() {
   display.setCursor(0, 0);
   display.print(F("Tuning: "));
   display.print(selection + 1);
+
+
+  // Highlight the channel if in the Channel step of the menu
+  if (menuStep == 1) {
+    display.setTextColor(BLACK, WHITE);
+  }
   display.print(F(" Channel: "));
   display.print(tuningSelection[selection].getChannel());
+  display.setTextColor(WHITE, BLACK);  // Reset text color
 
+  // Highlight the notes if in the Notes step of the menu
+  if (menuStep == 2) {
+    display.setTextColor(BLACK, WHITE);
+  }
   // Display first set of notes
   display.setCursor(0, 16);
-  display.print(F("Notes: "));
-  display.setCursor(0, 30);
+  display.print(F(" Notes: "));
+  display.setTextColor(WHITE, BLACK);  // Reset text color
+  display.setCursor(2, 30);
   for (int i = 0; i < 5; ++i) {
     display.print(tuningSelection[selection].getNote(i));
     display.print(F(" "));
   }
 
   // Display second set of notes on next line
-  display.setCursor(0, 46);  // Adjust the x-coordinate based on your display size
+  display.setCursor(2, 46);  // Adjust the x-coordinate based on your display size
   for (int i = 5; i < 10; ++i) {
     display.print(tuningSelection[selection].getNote(i));
     display.print(F(" "));

@@ -48,12 +48,14 @@ int selection = 0;
 // Array to store the previous state of each button
 uint8_t previousButtonState[24] = { 0 };  // Updated array size
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Tuning class to allow for multiple variations
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class Tuning {
 private:
   byte notes[10] = {};
   byte channel = 1;
-  byte velocity = 3;
+  byte velocity = 127;
 
 public:
   // constructor
@@ -78,7 +80,7 @@ public:
     velocity = velocity + change;
   }
 };
-
+// End of Tuning Class ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // Major Pentatonic
 // MIDI notes: C4, D4, E4, F4, G4, A4, B4, C5, D5, E5
@@ -128,14 +130,16 @@ void setup() {
   display.clearDisplay();  // Clear the display
 
   readPots();
-  displayTuningChannel();
+  displayTuning();
 
   MIDI.begin(MIDI_CHANNEL_OMNI);  // Initialize the Midi Library.
+
+  // Set up the pinz
   pinMode(muxCommon, INPUT_PULLUP);
 
-  pinMode(signal0, OUTPUT);
-  pinMode(signal1, OUTPUT);
-  pinMode(signal2, OUTPUT);
+  pinMode(signal0, OUTPUT);  // For MUX
+  pinMode(signal1, OUTPUT);  // For MUX
+  pinMode(signal2, OUTPUT);  // For MUX
 
   pinMode(enableMux0, OUTPUT);
   pinMode(enableMux1, OUTPUT);
@@ -151,7 +155,7 @@ void setup() {
 // ~~~~~~~~~~~~
 void loop() {
   readPots();
-  displayTuningChannel();
+  displayTuning();
   lightMenuLED();
   buttonMux();
 }
@@ -305,7 +309,7 @@ void enableMux(uint8_t mux) {
   }
 }
 
-void displayTuningChannel() {
+void displayTuning() {
   display.clearDisplay();
   display.setCursor(0, 0);
   display.print(F("Tuning: "));

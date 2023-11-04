@@ -200,7 +200,17 @@ void handleButtonPress(uint8_t i) {
         // Do noting because max of 127 reached
       }
     }
+    // Change the selected note up
+    else if (i == 14 && menuStep == 2) {
+      // Gotta figure out the logic
+    }
     // Up Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Right Button ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    else if (i == 15 && menuStep == 2) {
+      // Scroll right through notes
+      // Gotta figure it out
+    }
+    // Right Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Down Button ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // change the MIDI channel down
     else if (i == 16 && menuStep == 1) {
@@ -211,7 +221,13 @@ void handleButtonPress(uint8_t i) {
         // Reset to 16 because min of 1 reached
         tuningSelection[selection].changeChannel(15);
       }
-    } else if (i == 16 && menuStep == 3) {
+    }
+    // Change the selected note down
+    else if (i == 16 && menuStep == 2) {
+      // Gotta figure it out
+    }
+    // Change the velocity down
+    else if (i == 16 && menuStep == 3) {
       // limit 0-127
       if (tuningSelection[selection].getVelocity() > 0) {
         tuningSelection[selection].changeVelocity(-1);
@@ -220,6 +236,12 @@ void handleButtonPress(uint8_t i) {
       }
     }
     // Down Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Left Button ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if (i == 17 && menuStep == 2) {
+      // Scroll left through notes
+      // Gotta figure it out
+    }
+    // Left Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   }
   // Menu Button
   else if (i == 18) {

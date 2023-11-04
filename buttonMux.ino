@@ -67,18 +67,20 @@ public:
   byte getNote(uint8_t i) {
     return notes[i];
   }
-
+  void changeNote(uint8_t index, byte change) {
+    notes[index] += change;
+  }
   byte getChannel() {
     return channel;
   }
   void changeChannel(byte change) {
-    channel = channel + change;
+    channel += change;
   }
   byte getVelocity() {
     return velocity;
   }
   void changeVelocity(byte change) {
-    velocity = velocity + change;
+    velocity += change;
   }
 };
 // End of Tuning Class ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -203,7 +205,12 @@ void handleButtonPress(uint8_t i) {
     }
     // Change the selected note up
     else if (i == 14 && menuStep == 2) {
-      // Gotta figure out the logic
+      // limit 0-127
+      if (tuningSelection[selection].getNote(selectedNote) < 127) {
+        tuningSelection[selection].changeNote(selectedNote, 1);
+      } else {
+        // Do noting because max of 127 reached
+      }
     }
     // Up Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Right Button ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -230,7 +237,12 @@ void handleButtonPress(uint8_t i) {
     }
     // Change the selected note down
     else if (i == 16 && menuStep == 2) {
-      // Gotta figure it out
+      // limit 0-127
+      if (tuningSelection[selection].getNote(selectedNote) > 0) {
+        tuningSelection[selection].changeNote(selectedNote, -1);
+      } else {
+        // Do nothing because min of 0 reached
+      }
     }
     // Change the velocity down
     else if (i == 16 && menuStep == 3) {

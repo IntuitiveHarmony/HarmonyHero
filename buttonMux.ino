@@ -37,7 +37,8 @@ uint8_t muxCommon = 7;
 // Menu Parameters
 // ~~~~~~~~~~~~~~~
 uint8_t menuLED = 6;
-uint8_t menuStep = 0;  // 0-Home 1-Channel 2-Notes 3-velocity 4-StrumSwitches
+uint8_t menuStep = 0;      // 0-Home 1-Channel 2-Notes 3-velocity 4-StrumSwitches
+uint8_t selectedNote = 0;  // Note to edit, based off index
 
 // ~~~~~~~~~~~~~~~~~~~
 // Selector Parameters
@@ -208,7 +209,12 @@ void handleButtonPress(uint8_t i) {
     // Right Button ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     else if (i == 15 && menuStep == 2) {
       // Scroll right through notes
-      // Gotta figure it out
+      // Limit to 0-9
+      if (selectedNote < 9) {
+        selectedNote++;
+      } else {
+        selectedNote = 0;
+      }
     }
     // Right Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Down Button ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -237,9 +243,14 @@ void handleButtonPress(uint8_t i) {
     }
     // Down Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Left Button ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Scroll left through notes
     if (i == 17 && menuStep == 2) {
-      // Scroll left through notes
-      // Gotta figure it out
+      // Limit to 0-9
+      if (selectedNote > 0) {
+        selectedNote--;
+      } else {
+        selectedNote = 9;
+      }
     }
     // Left Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   }
@@ -356,13 +367,23 @@ void displayTuning() {
   display.setTextColor(WHITE, BLACK);  // Reset text color
   display.setCursor(2, 28);
   for (int i = 0; i < 5; ++i) {
+    // Highlight selected note to edit
+    if (selectedNote == i && menuStep == 2) {
+      display.setTextColor(BLACK, WHITE);
+    }
     display.print(tuningSelection[selection].getNote(i));
+    display.setTextColor(WHITE, BLACK);  // Reset text color
     display.print(F(" "));
   }
   // Display second set of notes on next line
   display.setCursor(2, 42);
   for (int i = 5; i < 10; ++i) {
+    // Highlight selected note to edit
+    if (selectedNote == i && menuStep == 2) {
+      display.setTextColor(BLACK, WHITE);
+    }
     display.print(tuningSelection[selection].getNote(i));
+    display.setTextColor(WHITE, BLACK);  // Reset text color
     display.print(F(" "));
   }
 

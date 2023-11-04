@@ -1,6 +1,8 @@
 #include <Wire.h>              // For display
 #include <Adafruit_SSD1306.h>  // For display
 
+#include <EEPROM.h>  // To save variables across power cycle
+
 #include <MIDI.h>  // Add Midi Library
 
 // Define OLED parameters
@@ -44,7 +46,7 @@ uint8_t previousButtonState[24] = { 0 };  // Updated array size
 class Tuning {
 private:
   byte notes[10] = {};
-  byte channel = 0;
+  byte channel = 1;
 
 public:
   // constructor
@@ -82,7 +84,8 @@ byte notes4[10] = { 60, 62, 63, 65, 67, 69, 71, 72, 74, 76 };
 
 // Mixolydian Scale
 // MIDI notes: C4, D4, E4, F4, G4, A4, B4, C5, D5, E5
-byte notes5[10] = { 60, 62, 64, 65, 67, 69, 71, 72, 74, 76 };
+// byte notes5[10] = { 60, 62, 64, 65, 67, 69, 71, 72, 74, 76 };
+byte notes5[10] = { 120, 127, 124, 125, 67, 115, 111, 123, 120, 116 };
 
 // Array of all the tuning instances available
 Tuning tuningSelection[5] = {
@@ -251,6 +254,22 @@ void displayTuningChannel() {
   display.print(selection + 1);
   display.print(F(" Channel: "));
   display.print(tuningSelection[selection].getChannel());
+
+  // Display first set of notes
+  display.setCursor(0, 16);
+  display.print(F("Notes: "));
+  display.setCursor(0, 30);
+  for (int i = 0; i < 5; ++i) {
+    display.print(tuningSelection[selection].getNote(i));
+    display.print(F(" "));
+  }
+
+  // Display second set of notes on next line
+  display.setCursor(0, 46);  // Adjust the x-coordinate based on your display size
+  for (int i = 5; i < 10; ++i) {
+    display.print(tuningSelection[selection].getNote(i));
+    display.print(F(" "));
+  }
   display.display();
 }
 

@@ -53,7 +53,7 @@ class Tuning {
 private:
   byte notes[10] = {};
   byte channel = 1;
-  byte velocity = 127;
+  byte velocity = 3;
 
 public:
   // constructor
@@ -177,7 +177,7 @@ void handleButtonPress(uint8_t i) {
   // Directional buttons
   else if (i >= 14 && i <= 17) {
     // Up Button ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // change the MIDI channel
+    // change the MIDI channel up
     if (i == 14 && menuStep == 1) {
       // limit 1-16
       if (tuningSelection[selection].getChannel() < 16) {
@@ -187,13 +187,18 @@ void handleButtonPress(uint8_t i) {
         tuningSelection[selection].changeChannel(-15);
       }
     }
-    // Change the velocity
+    // Change the velocity up
     else if (i == 14 && menuStep == 3) {
-      tuningSelection[selection].changeVelocity(1);
+      // limit 0-127
+      if (tuningSelection[selection].getVelocity() < 127) {
+        tuningSelection[selection].changeVelocity(1);
+      } else {
+        // Do noting because max of 127 reached
+      }
     }
     // Up Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Down Button ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // change the MIDI channel
+    // change the MIDI channel down
     else if (i == 16 && menuStep == 1) {
       // limit 1-16
       if (tuningSelection[selection].getChannel() > 1) {
@@ -203,8 +208,14 @@ void handleButtonPress(uint8_t i) {
         tuningSelection[selection].changeChannel(15);
       }
     } else if (i == 16 && menuStep == 3) {
-      tuningSelection[selection].changeVelocity(-1);
+      // limit 0-127
+      if (tuningSelection[selection].getVelocity() > 0) {
+        tuningSelection[selection].changeVelocity(-1);
+      } else {
+        // Do nothing because min of 0 reached
+      }
     }
+    // Down Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   }
   // Menu Button
   else if (i == 18) {

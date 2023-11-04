@@ -141,12 +141,12 @@ void loop() {
 // Button Logic
 // ~~~~~~~~~~~~
 // Neck buttons....0-9
-// Strum buttons...10-13
-// Directional buttons...14-17
+// Strum buttons...10-13       || 10-NeckDown   11-NeckUp     12-BridgeDown     13-BridgeUp
+// Directional buttons...14-17 || 14-Up    15-Right    16-Down    17-Left
 void handleButtonPress(uint8_t i) {
   byte velocity = 80;
 
-  // Send MIDI note on based on the current tuning selection
+  // Send MIDI note on based on the current tuning selection (note, velocity, channel)
   if (i <= 9) {
     MIDI.sendNoteOn(tuningSelection[selection].getNote(i), velocity, tuningSelection[selection].getChannel());
   }
@@ -154,12 +154,12 @@ void handleButtonPress(uint8_t i) {
   else if (i >= 10 && i <= 13) {
     // will do later
   }
-  // Directional buttons 
+  // Directional buttons
   else if (i >= 14 && i <= 17) {
     // Up Button
-    if(i == 14) {
+    if (i == 14) {
       tuningSelection[selection].changeChannel(1);
-    } 
+    }
     // Down Button
     else if (i == 16) {
       tuningSelection[selection].changeChannel(-1);
@@ -180,7 +180,7 @@ void handleButtonPress(uint8_t i) {
 }
 
 void handleButtonRelease(uint8_t i) {
-  // Trun off MIDI notes that have been played
+  // Trun off MIDI notes that have been played (note, velocity, channel)
   if (i <= 9) {
     MIDI.sendNoteOff(tuningSelection[selection].getNote(i), 0, tuningSelection[selection].getChannel());
   }
@@ -191,6 +191,8 @@ void handleButtonRelease(uint8_t i) {
   // Serial.print(i);
   // Serial.println(" Released!");
 }
+
+
 
 void buttonMux() {
   // Loop through all the button channels on the MUX

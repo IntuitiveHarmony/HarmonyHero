@@ -53,6 +53,7 @@ class Tuning {
 private:
   byte notes[10] = {};
   byte channel = 1;
+  byte velocity = 127;
 
 public:
   // constructor
@@ -69,6 +70,12 @@ public:
   }
   void changeChannel(byte change) {
     channel = channel + change;
+  }
+  byte getVelocity() {
+    return velocity;
+  }
+  void changeVelocity(byte change) {
+    velocity = velocity + change;
   }
 };
 
@@ -161,7 +168,7 @@ void handleButtonPress(uint8_t i) {
 
   // Send MIDI note on based on the current tuning selection (note, velocity, channel)
   if (i <= 9) {
-    MIDI.sendNoteOn(tuningSelection[selection].getNote(i), velocity, tuningSelection[selection].getChannel());
+    MIDI.sendNoteOn(tuningSelection[selection].getNote(i), tuningSelection[selection].getVelocity(), tuningSelection[selection].getChannel());
   }
   // Send MIDI CC messages from the strum buttons
   else if (i >= 10 && i <= 13) {
@@ -169,17 +176,39 @@ void handleButtonPress(uint8_t i) {
   }
   // Directional buttons
   else if (i >= 14 && i <= 17) {
-    // Up Button
+    // Up Button ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // change the MIDI channel
     if (i == 14 && menuStep == 1) {
-      tuningSelection[selection].changeChannel(1);
+      // limit 1-16
+      if (tuningSelection[selection].getChannel() < 16) {
+        tuningSelection[selection].changeChannel(1);
+      } else {
+        // Reset to 1 because max of 16 reached
+        tuningSelection[selection].changeChannel(-15);
+      }
     }
-    // Down Button
+    // Change the velocity
+    else if (i == 14 && menuStep == 3) {
+      tuningSelection[selection].changeVelocity(1);
+    }
+    // Up Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Down Button ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // change the MIDI channel
     else if (i == 16 && menuStep == 1) {
-      tuningSelection[selection].changeChannel(-1);
+      // limit 1-16
+      if (tuningSelection[selection].getChannel() > 1) {
+        tuningSelection[selection].changeChannel(-1);
+      } else {
+        // Reset to 16 because min of 1 reached
+        tuningSelection[selection].changeChannel(15);
+      }
+    } else if (i == 16 && menuStep == 3) {
+      tuningSelection[selection].changeVelocity(-1);
     }
   }
   // Menu Button
   else if (i == 18) {
+    // Limit to 0-4
     if (menuStep < 4) {
       menuStep++;
     } else {
@@ -285,21 +314,30 @@ void displayTuningChannel() {
     display.setTextColor(BLACK, WHITE);
   }
   // Display first set of notes
-  display.setCursor(0, 16);
+  display.setCursor(0, 15);
   display.print(F(" Notes: "));
   display.setTextColor(WHITE, BLACK);  // Reset text color
-  display.setCursor(2, 30);
+  display.setCursor(2, 28);
   for (int i = 0; i < 5; ++i) {
     display.print(tuningSelection[selection].getNote(i));
     display.print(F(" "));
   }
-
   // Display second set of notes on next line
-  display.setCursor(2, 46);  // Adjust the x-coordinate based on your display size
+  display.setCursor(2, 42);
   for (int i = 5; i < 10; ++i) {
     display.print(tuningSelection[selection].getNote(i));
     display.print(F(" "));
   }
+
+  // Display velocity
+  // Highlight the velocity if in the Velocity step of the menu
+  if (menuStep == 3) {
+    display.setTextColor(BLACK, WHITE);
+  }
+  display.setCursor(35, 56);
+  display.print(F(" Velocity: "));
+  display.print(tuningSelection[selection].getVelocity());
+  display.setTextColor(WHITE, BLACK);  // Reset text color
   display.display();
 }
 

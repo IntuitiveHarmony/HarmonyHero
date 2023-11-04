@@ -44,6 +44,7 @@ uint8_t previousButtonState[24] = { 0 };  // Updated array size
 class Tuning {
 private:
   byte notes[10] = {};
+  byte channel = 0;
 
 public:
   // constructor
@@ -53,6 +54,13 @@ public:
   }
   byte getNote(uint8_t i) {
     return notes[i];
+  }
+
+  byte getChannel() {
+    return channel;
+  }
+  void changeChannel(byte change) {
+    channel = channel + change;
   }
 };
 
@@ -132,29 +140,51 @@ void loop() {
 // ~~~~~~~~~~~~
 // Button Logic
 // ~~~~~~~~~~~~
+// Neck buttons....0-9
+// Strum buttons...10-13
+// Directional buttons...14-17
 void handleButtonPress(uint8_t i) {
   byte velocity = 80;
-  byte channel = 14;
 
-  MIDI.sendNoteOn(tuningSelection[selection].getNote(i), velocity, channel);
+  // Send MIDI note on based on the current tuning selection
+  if (i <= 9) {
+    MIDI.sendNoteOn(tuningSelection[selection].getNote(i), velocity, tuningSelection[selection].getChannel());
+  }
+  // Send MIDI CC messages from the strum buttons
+  else if (i >= 10 && i <= 13) {
+    // will do later
+  }
+  // Directional buttons 
+  else if (i >= 14 && i <= 17) {
+    // Up Button
+    if(i == 14) {
+      tuningSelection[selection].changeChannel(1);
+    } 
+    // Down Button
+    else if (i == 16) {
+      tuningSelection[selection].changeChannel(-1);
+    }
+  }
 
-  display.setCursor(0, 16);
-  display.print(F("Button "));
-  display.setCursor(39, 16);
-  display.print(i);
-  display.setCursor(44, 16);
-  display.print(F(" Pressed!"));
-  display.display();  // Update the display
+  // display.setCursor(0, 16);
+  // display.print(F("Button "));
+  // display.setCursor(39, 16);
+  // display.print(i);
+  // display.setCursor(44, 16);
+  // display.print(F(" Pressed!"));
+  // display.display();  // Update the display
 
-  // Serial.print("Button ");
-  // Serial.print(i);
-  // Serial.println(" Pressed!");
+  Serial.print("Button ");
+  Serial.print(i);
+  Serial.println(" Pressed!");
 }
 
 void handleButtonRelease(uint8_t i) {
-  MIDI.sendNoteOff(tuningSelection[selection].getNote(i), 0, 14);
-
-  display.clearDisplay();  // clear the display
+  // Trun off MIDI notes that have been played
+  if (i <= 9) {
+    MIDI.sendNoteOff(tuningSelection[selection].getNote(i), 0, tuningSelection[selection].getChannel());
+  }
+  // display.clearDisplay();  // clear the display
 
 
   // Serial.print("Button ");
@@ -218,7 +248,7 @@ void displayTuningChannel() {
   display.print(F("Tuning: "));
   display.print(selection + 1);
   display.print(F(" Channel: "));
-  display.print(F("16"));
+  display.print(tuningSelection[selection].getChannel());
   display.display();
 }
 

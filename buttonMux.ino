@@ -33,6 +33,12 @@ uint8_t enableMux2 = 10;
 // common signal
 uint8_t muxCommon = 7;
 
+// ~~~~~~~~~~~~~~~
+// Menu Parameters
+// ~~~~~~~~~~~~~~~
+uint8_t menuLED = 6;
+uint8_t menuStep = 0; // 0-Home 1-Channel 2-Notes 3-velocity 4-StrumSwitches
+
 // ~~~~~~~~~~~~~~~~~~~
 // Selector Parameters
 // ~~~~~~~~~~~~~~~~~~~
@@ -129,6 +135,8 @@ void setup() {
   pinMode(enableMux2, OUTPUT);
 
   pinMode(selectPot, INPUT_PULLUP);
+
+  pinMode(menuLED, OUTPUT);
 }
 
 // ~~~~~~~~~~~~
@@ -137,6 +145,7 @@ void setup() {
 void loop() {
   readPots();
   displayTuningChannel();
+  lightMenuLED();
   buttonMux();
 }
 
@@ -146,6 +155,7 @@ void loop() {
 // Neck buttons....0-9
 // Strum buttons...10-13       || 10-NeckDown   11-NeckUp     12-BridgeDown     13-BridgeUp
 // Directional buttons...14-17 || 14-Up    15-Right    16-Down    17-Left
+// Menu Button...18
 void handleButtonPress(uint8_t i) {
   byte velocity = 80;
 
@@ -160,12 +170,20 @@ void handleButtonPress(uint8_t i) {
   // Directional buttons
   else if (i >= 14 && i <= 17) {
     // Up Button
-    if (i == 14) {
+    if (i == 14 && menuStep == 1) {
       tuningSelection[selection].changeChannel(1);
     }
     // Down Button
-    else if (i == 16) {
+    else if (i == 16 && menuStep == 1) {
       tuningSelection[selection].changeChannel(-1);
+    }
+  }
+  // Menu Button
+  else if (i == 18) {
+    if (menuStep < 4) {
+      menuStep++;
+    } else {
+      menuStep = 0;
     }
   }
 
@@ -277,4 +295,12 @@ void readPots() {
   // Read the "5 way" selection Pot, map it and assign it. -1 to sync with index of tuningSelection array
   uint8_t selectVoltage = analogRead(selectPot);
   selection = map(selectVoltage, 15, 215, 1, 5) - 1;
+}
+
+void lightMenuLED() {
+  if (menuStep > 0) {
+    digitalWrite(menuLED, HIGH);
+  } else {
+    digitalWrite(menuLED, LOW);
+  }
 }

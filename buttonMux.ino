@@ -56,18 +56,26 @@ class Tuning {
 private:
   // Default values can be changed by the user
   byte notes[10] = {};
-  byte channel = 11;
+  byte channel = 12;
   byte velocity = 127;
 
-  byte neckCC = 1;  // MOD wheel
-  byte neckSwitchRest = 0;
-  byte neckSwitchDown = 60;
-  byte neckSwitchUp = 127;
+  // 4 user assignable CC params tied to the strum switches
+  // Default Values provided, may not work as anticipated depending on individual synth's local CC routing
+  byte neckUpCC = 1;  // MOD wheel
+  byte neckUpOff = 0;
+  byte neckUpOn = 127;
 
-  byte bridgeCC = 7;  // Volume
-  byte bridgeSwitchRest = 127;
-  byte bridgeSwitchDown = 0;
-  byte bridgeSwitchUp = 60;
+  byte neckDownCC = 5;  // Portamento
+  byte neckDownOffValue = 0;
+  byte neckDownOnValue = 55;
+
+  byte bridgeUpCC = 70;  // LFO Depth
+  byte bridgeUpOffValue = 64;
+  byte bridgeUpOnValue = 63;
+
+  byte bridgeDownCC = 7;  // Volume
+  byte bridgeDownOffValue = 127;
+  byte bridgeDownOnValue = 0;
 
 public:
   // constructor
@@ -75,80 +83,106 @@ public:
     // Copy the notes from the provided array to the class's notes array
     memcpy(notes, initialNotes, sizeof(notes));
   }
+  // Note Methods
   byte getNote(uint8_t i) {
     return notes[i];
   }
   void changeNote(uint8_t index, byte change) {
     notes[index] += change;
   }
+  // Channel Methods
   byte getChannel() {
     return channel;
   }
   void changeChannel(byte change) {
     channel += change;
   }
+  // Velocity methods
   byte getVelocity() {
     return velocity;
   }
   void changeVelocity(byte change) {
     velocity += change;
   }
-
-  // Control Change Methods
-  byte getNeckCC() {
-    return neckCC;
+  // Control Change Methods ~~~~~~~~~~~~~
+  // Neck Up CC Methods
+  byte getNeckUpCC() {
+    return neckUpCC;
   }
-  void changeNeckCC(byte change) {
-    neckCC += change;
+  void setNeckUpCC(byte change) {
+    neckUpCC += change;
   }
-
-  byte getNeckSwitchRest() {
-    return neckSwitchRest;
+  byte getNeckUpOffValue() {
+    return neckUpOff;
   }
-  void changeNeckSwitchRest(byte change) {
-    neckSwitchRest += change;
+  void setNeckUpOffValue(byte change) {
+    neckUpOff += change;
   }
-
-  byte getNeckSwitchDown() {
-    return neckSwitchDown;
+  byte getNeckUpOnValue() {
+    return neckUpOn;
   }
-  void changeNeckSwitchDown(byte change) {
-    neckSwitchDown += change;
+  void setNeckUpOnValue(byte change) {
+    neckUpOn += change;
   }
 
-  byte getNeckSwitchUp() {
-    return neckSwitchUp;
+  // Neck Down CC Methods
+  byte getNeckDownCC() {
+    return neckDownCC;
   }
-  void changeNeckSwitchUp(byte change) {
-    neckSwitchUp += change;
+  void setNeckDownCC(byte change) {
+    neckDownCC += change;
   }
-
-  byte getBridgeCC() {
-    return bridgeCC;
+  byte getNeckDownOffValue() {
+    return neckDownOffValue;
   }
-  void changeBridgeCC(byte change) {
-    bridgeCC += change;
+  void setNeckDownOffValue(byte change) {
+    neckDownOffValue += change;
   }
-
-  byte getBridgeSwitchRest() {
-    return bridgeSwitchRest;
+  byte getNeckDownOnValue() {
+    return neckDownOnValue;
   }
-  void changeBridgeSwitchRest(byte change) {
-    bridgeSwitchRest += change;
-  }
-
-  byte getBridgeSwitchDown() {
-    return bridgeSwitchDown;
-  }
-  void changeBridgeSwitchDown(byte change) {
-    bridgeSwitchDown += change;
+  void setNeckDownOnValue(byte change) {
+    neckDownOnValue += change;
   }
 
-  byte getBridgeSwitchUp() {
-    return bridgeSwitchUp;
+  // Bridge Up CC Methods
+  byte getBridgeUpCC() {
+    return bridgeUpCC;
   }
-  void changeBridgeSwitchUp(byte change) {
-    bridgeSwitchUp += change;
+  void setBridgeUpCC(byte change) {
+    bridgeUpCC += change;
+  }
+  byte getBridgeUpOffValue() {
+    return bridgeUpOffValue;
+  }
+  void setBridgeUpOffValue(byte change) {
+    bridgeUpOffValue += change;
+  }
+  byte getBridgeUpOnValue() {
+    return bridgeUpOnValue;
+  }
+  void setBridgeUpOnValue(byte change) {
+    bridgeUpOnValue += change;
+  }
+
+  // Bridge Down CC Methods
+  byte getBridgeDownCC() {
+    return bridgeDownCC;
+  }
+  void setBridgeDownCC(byte change) {
+    bridgeDownCC += change;
+  }
+  byte getBridgeDownOffValue() {
+    return bridgeDownOffValue;
+  }
+  void setBridgeDownOffValue(byte change) {
+    bridgeDownOffValue += change;
+  }
+  byte getBridgeDownOnValue() {
+    return bridgeDownOnValue;
+  }
+  void setBridgeDownOnValue(byte change) {
+    bridgeDownOnValue += change;
   }
 };
 // End of Tuning Class ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -259,25 +293,25 @@ void handleButtonPress(uint8_t i) {
   if (i <= 9) {
     MIDI.sendNoteOn(tuningSelection[selection].getNote(i), tuningSelection[selection].getVelocity(), tuningSelection[selection].getChannel());
   }
-  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  // Send MIDI CC messages from the strum buttons
-  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // Send MIDI CC messages from the strum buttons (control, value, channel)
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   else if (i >= 10 && i <= 13) {
     // Neck Down
     if (i == 10) {
-      MIDI.sendControlChange(tuningSelection[selection].getNeckCC(), tuningSelection[selection].getNeckSwitchDown(), tuningSelection[selection].getChannel());
+      MIDI.sendControlChange(tuningSelection[selection].getNeckDownCC(), tuningSelection[selection].getNeckDownOnValue(), tuningSelection[selection].getChannel());
     }
     // Neck Up
     else if (i == 11) {
-      MIDI.sendControlChange(tuningSelection[selection].getNeckCC(), tuningSelection[selection].getNeckSwitchUp(), tuningSelection[selection].getChannel());
+      MIDI.sendControlChange(tuningSelection[selection].getNeckUpCC(), tuningSelection[selection].getNeckUpOnValue(), tuningSelection[selection].getChannel());
     }
     // Bridge Down
-    if (i == 12) {
-      MIDI.sendControlChange(tuningSelection[selection].getBridgeCC(), tuningSelection[selection].getBridgeSwitchDown(), tuningSelection[selection].getChannel());
+    else if (i == 12) {
+      MIDI.sendControlChange(tuningSelection[selection].getBridgeDownCC(), tuningSelection[selection].getBridgeDownOnValue(), tuningSelection[selection].getChannel());
     }
     // Bridge Up
     else if (i == 13) {
-      MIDI.sendControlChange(tuningSelection[selection].getBridgeCC(), tuningSelection[selection].getBridgeSwitchUp(), tuningSelection[selection].getChannel());
+      MIDI.sendControlChange(tuningSelection[selection].getBridgeUpCC(), tuningSelection[selection].getBridgeUpOnValue(), tuningSelection[selection].getChannel());
     }
   }
   // ~~~~~~~~~~~~~~~~~~~
@@ -414,21 +448,33 @@ void handleButtonRelease(uint8_t i) {
   // Reset the strum switches
 
   else if (i >= 10 && i <= 13) {
-    // Reset neck Switch
-    if (i == 10 || i == 11) {
-      MIDI.sendControlChange(tuningSelection[selection].getNeckCC(), tuningSelection[selection].getNeckSwitchRest(), tuningSelection[selection].getChannel());
+    // Reset neck down Switch
+    if (i == 10) {
+      Serial.println("RESET!!!!!!!!!!!!");
+      MIDI.sendControlChange(tuningSelection[selection].getNeckDownCC(), tuningSelection[selection].getNeckDownOffValue(), tuningSelection[selection].getChannel());
     }
-    // Reset neck Switch
-    else if (i == 12 || i == 13) {
-      MIDI.sendControlChange(tuningSelection[selection].getBridgeCC(), tuningSelection[selection].getBridgeSwitchRest(), tuningSelection[selection].getChannel());
+    // Reset neck up Switch
+    else if (i == 11) {
+      Serial.println("RESET!!!!!!!!!!!!");
+      MIDI.sendControlChange(tuningSelection[selection].getNeckUpCC(), tuningSelection[selection].getNeckUpOffValue(), tuningSelection[selection].getChannel());
+    }
+    // Reset bridge down Switch
+    else if (i == 12) {
+      Serial.println("RESET!!!!!!!!!!!!");
+      MIDI.sendControlChange(tuningSelection[selection].getBridgeDownCC(), tuningSelection[selection].getBridgeDownOffValue(), tuningSelection[selection].getChannel());
+    }
+    // Reset bridge up Switch
+    else if (i == 13) {
+      Serial.println("RESET!!!!!!!!!!!!");
+      MIDI.sendControlChange(tuningSelection[selection].getBridgeUpCC(), tuningSelection[selection].getBridgeUpOffValue(), tuningSelection[selection].getChannel());
     }
   }
   // display.clearDisplay();  // clear the display
 
 
-  // Serial.print("Button ");
-  // Serial.print(i);
-  // Serial.println(" Released!");
+  Serial.print("Button ");
+  Serial.print(i);
+  Serial.println(" Released!");
 }
 
 

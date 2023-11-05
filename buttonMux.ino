@@ -54,9 +54,20 @@ uint8_t previousButtonState[24] = { 0 };  // Updated array size
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class Tuning {
 private:
+  // Default values can be changed by the user
   byte notes[10] = {};
   byte channel = 1;
   byte velocity = 127;
+
+  byte neckCC = 1;  // MOD wheel
+  byte neckSwitchRest = 0;
+  byte neckSwitchDown = 60;
+  byte neckSwitchUp = 127;
+
+  byte bridgeCC = 7;  // Volume
+  byte bridgeSwitchRest = 127;
+  byte bridgeSwitchDown = 0;
+  byte bridgeSwitchUp = 60;
 
 public:
   // constructor
@@ -81,6 +92,63 @@ public:
   }
   void changeVelocity(byte change) {
     velocity += change;
+  }
+
+  // Control Change Methods
+  byte getNeckCC() {
+    return neckCC;
+  }
+  void changeNeckCC(byte change) {
+    neckCC += change;
+  }
+
+  byte getNeckSwitchRest() {
+    return neckSwitchRest;
+  }
+  void changeNeckSwitchRest(byte change) {
+    neckSwitchRest += change;
+  }
+
+  byte getNeckSwitchDown() {
+    return neckSwitchDown;
+  }
+  void changeNeckSwitchDown(byte change) {
+    neckSwitchDown += change;
+  }
+
+  byte getNeckSwitchUp() {
+    return neckSwitchUp;
+  }
+  void changeNeckSwitchUp(byte change) {
+    neckSwitchUp += change;
+  }
+
+  byte getBridgeCC() {
+    return bridgeCC;
+  }
+  void changeBridgeCC(byte change) {
+    bridgeCC += change;
+  }
+
+  byte getBridgeSwitchRest() {
+    return bridgeSwitchRest;
+  }
+  void changeBridgeSwitchRest(byte change) {
+    bridgeSwitchRest += change;
+  }
+
+  byte getBridgeSwitchDown() {
+    return bridgeSwitchDown;
+  }
+  void changeBridgeSwitchDown(byte change) {
+    bridgeSwitchDown += change;
+  }
+
+  byte getBridgeSwitchUp() {
+    return bridgeSwitchUp;
+  }
+  void changeBridgeSwitchUp(byte change) {
+    bridgeSwitchUp += change;
   }
 };
 // End of Tuning Class ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -169,7 +237,7 @@ void loop() {
 // Neck buttons....0-9
 // Strum buttons...10-13       || 10-NeckDown   11-NeckUp     12-BridgeDown     13-BridgeUp
 // Directional buttons...14-17 || 14-Up    15-Right    16-Down    17-Left
-// Menu Button...18
+// Save Button...18
 void handleButtonPress(uint8_t i) {
   byte velocity = 80;
 
@@ -266,14 +334,26 @@ void handleButtonPress(uint8_t i) {
     }
     // Left Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   }
-  // Menu Button
+  // Menu Buttons
+  // Start Button
   else if (i == 18) {
-    // Limit to 0-4
-    if (menuStep < 4) {
+    // Limit to 0-5
+    if (menuStep < 5) {
       menuStep++;
     } else {
       menuStep = 0;
     }
+  } else if (i == 19) {
+    // Limit to 0-5
+    if (menuStep > 0) {
+      menuStep--;
+    } else {
+      menuStep = 5;
+    }
+  }
+  // Save Button
+  else if (i == 20) {
+    // eeprom logic
   }
 
   // display.setCursor(0, 16);

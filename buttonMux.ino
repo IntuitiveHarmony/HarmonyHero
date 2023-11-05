@@ -56,7 +56,7 @@ class Tuning {
 private:
   // Default values can be changed by the user
   byte notes[10] = {};
-  byte channel = 1;
+  byte channel = 11;
   byte velocity = 127;
 
   byte neckCC = 1;  // MOD wheel
@@ -241,15 +241,36 @@ void loop() {
 void handleButtonPress(uint8_t i) {
   byte velocity = 80;
 
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // Send MIDI note on based on the current tuning selection (note, velocity, channel)
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   if (i <= 9) {
     MIDI.sendNoteOn(tuningSelection[selection].getNote(i), tuningSelection[selection].getVelocity(), tuningSelection[selection].getChannel());
   }
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // Send MIDI CC messages from the strum buttons
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   else if (i >= 10 && i <= 13) {
-    // will do later
+    // Neck Down
+    if (i == 10) {
+      MIDI.sendControlChange(tuningSelection[selection].getNeckCC(), tuningSelection[selection].getNeckSwitchDown(), tuningSelection[selection].getChannel());
+    }
+    // Neck Up
+    else if (i == 11) {
+      MIDI.sendControlChange(tuningSelection[selection].getNeckCC(), tuningSelection[selection].getNeckSwitchUp(), tuningSelection[selection].getChannel());
+    }
+    // Bridge Down
+    if (i == 12) {
+      MIDI.sendControlChange(tuningSelection[selection].getBridgeCC(), tuningSelection[selection].getBridgeSwitchDown(), tuningSelection[selection].getChannel());
+    }
+    // Bridge Up
+    else if (i == 13) {
+      MIDI.sendControlChange(tuningSelection[selection].getBridgeCC(), tuningSelection[selection].getBridgeSwitchUp(), tuningSelection[selection].getChannel());
+    }
   }
+  // ~~~~~~~~~~~~~~~~~~~
   // Directional buttons
+  // ~~~~~~~~~~~~~~~~~~~
   else if (i >= 14 && i <= 17) {
     // Up Button ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // change the MIDI channel up
@@ -334,8 +355,10 @@ void handleButtonPress(uint8_t i) {
     }
     // Left Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   }
+  // ~~~~~~~~~~~~
   // Menu Buttons
-  // Start Button
+  // ~~~~~~~~~~~~
+  // Start Button ~~~~~~~~~~~~~~~~~~~~~~~~
   else if (i == 18) {
     // Limit to 0-5
     if (menuStep < 5) {
@@ -343,7 +366,9 @@ void handleButtonPress(uint8_t i) {
     } else {
       menuStep = 0;
     }
-  } else if (i == 19) {
+  }
+  // Select Button ~~~~~~~~~~~~~~~~~~~~~~~
+  else if (i == 19) {
     // Limit to 0-5
     if (menuStep > 0) {
       menuStep--;
@@ -351,7 +376,7 @@ void handleButtonPress(uint8_t i) {
       menuStep = 5;
     }
   }
-  // Save Button
+  // Save Button ~~~~~~~~~~~~~~~~~~~~~~~~~~
   else if (i == 20) {
     // eeprom logic
   }
@@ -373,6 +398,18 @@ void handleButtonRelease(uint8_t i) {
   // Trun off MIDI notes that have been played (note, velocity, channel)
   if (i <= 9) {
     MIDI.sendNoteOff(tuningSelection[selection].getNote(i), 0, tuningSelection[selection].getChannel());
+  }
+  // Reset the strum switches
+
+  else if (i >= 10 && i <= 13) {
+    // Reset neck Switch
+    if (i == 10 || i == 11) {
+      MIDI.sendControlChange(tuningSelection[selection].getNeckCC(), tuningSelection[selection].getNeckSwitchRest(), tuningSelection[selection].getChannel());
+    }
+    // Reset neck Switch
+    else if (i == 12 || i == 13) {
+      MIDI.sendControlChange(tuningSelection[selection].getBridgeCC(), tuningSelection[selection].getBridgeSwitchRest(), tuningSelection[selection].getChannel());
+    }
   }
   // display.clearDisplay();  // clear the display
 

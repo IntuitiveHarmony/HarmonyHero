@@ -201,7 +201,7 @@ void setup() {
   display.clearDisplay();  // Clear the display
 
   readPots();
-  displayTuning();
+  displayTuningHeader();
 
   MIDI.begin(MIDI_CHANNEL_OMNI);  // Initialize the Midi Library.
 
@@ -226,9 +226,21 @@ void setup() {
 // ~~~~~~~~~~~~
 void loop() {
   readPots();
-  displayTuning();
-  lightMenuLED();
   buttonMux();
+  // Normally the Notes and Velocity will display
+  if (menuStep < 4) {
+    displayTuningHeader();
+    displayNotes();
+    displayVelocity();
+  }
+  // The edit menu is active on steps 4 and 5
+  else {
+    displayEditStrums();
+  }
+  lightMenuLED();
+
+  // Update the display at the end of the loop
+  display.display();
 }
 
 // ~~~~~~~~~~~~
@@ -471,12 +483,15 @@ void enableMux(uint8_t mux) {
   }
 }
 
-void displayTuning() {
+
+// ~~~~~~~~~~~~~~~~~~~~
+// Display Functions 👀
+// ~~~~~~~~~~~~~~~~~~~~
+void displayTuningHeader() {
   display.clearDisplay();
   display.setCursor(0, 0);
   display.print(F("Tuning: "));
   display.print(selection + 1);
-
 
   // Highlight the channel if in the Channel step of the menu
   if (menuStep == 1) {
@@ -485,7 +500,9 @@ void displayTuning() {
   display.print(F(" Channel: "));
   display.print(tuningSelection[selection].getChannel());
   display.setTextColor(WHITE, BLACK);  // Reset text color
+}
 
+void displayNotes() {
   // Highlight the notes if in the Notes step of the menu
   if (menuStep == 2) {
     display.setTextColor(BLACK, WHITE);
@@ -515,8 +532,9 @@ void displayTuning() {
     display.setTextColor(WHITE, BLACK);  // Reset text color
     display.print(F(" "));
   }
+}
 
-  // Display velocity
+void displayVelocity() {
   // Highlight the velocity if in the Velocity step of the menu
   if (menuStep == 3) {
     display.setTextColor(BLACK, WHITE);
@@ -525,7 +543,11 @@ void displayTuning() {
   display.print(F(" Velocity: "));
   display.print(tuningSelection[selection].getVelocity());
   display.setTextColor(WHITE, BLACK);  // Reset text color
-  display.display();
+}
+
+void displayEditStrums() {
+  display.clearDisplay();
+  displayTuningHeader();
 }
 
 void readPots() {

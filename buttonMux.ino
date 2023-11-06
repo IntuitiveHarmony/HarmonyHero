@@ -68,13 +68,13 @@ private:
 
   // 4 user assignable CC params tied to the strum switches
   // Default Values provided, may not work as anticipated depending on individual synth's local CC routing
-  byte neckUpCC = 1;  // MOD wheel
-  byte neckUpOff = 0;
+  byte neckUpCC = 127;  // MOD wheel
+  byte neckUpOff = 127;
   byte neckUpOn = 127;
 
-  byte neckDownCC = 5;  // Portamento
-  byte neckDownOffValue = 0;
-  byte neckDownOnValue = 55;
+  byte neckDownCC = 127;  // Portamento
+  byte neckDownOffValue = 127;
+  byte neckDownOnValue = 127;
 
   byte bridgeUpCC = 70;  // LFO Depth
   byte bridgeUpOffValue = 64;
@@ -430,6 +430,93 @@ void handleButtonPress(uint8_t i) {
         // Do nothing because min of 0 reached
       }
     }
+    // Change Neck Up CC
+    else if (i == 16 && menuStep == 4) {
+      if (selectedCC == 0) {
+        // limit 0-127
+        if (tuningSelection[selection].getNeckUpCC() > 0) {
+          tuningSelection[selection].setNeckUpCC(-1);
+        } else {
+          // Do nothing because min of 0 reached
+        }
+      } else if (selectedCC == 1) {
+        // limit 0-127
+        if (tuningSelection[selection].getNeckUpOffValue() > 0) {
+          tuningSelection[selection].setNeckUpOffValue(-1);
+        } else {
+          // Do nothing because min of 0 reached
+        }
+      }
+      // Change Neck Up On Value
+      else if (selectedCC == 2) {
+        // limit 0-127
+        if (tuningSelection[selection].getNeckUpOnValue() > 0) {
+          tuningSelection[selection].setNeckUpOnValue(-1);
+        } else {
+          // Do nothing because min of 0 reached
+        }
+      }
+      // Change Neck Down CC Value
+      else if (selectedCC == 3) {
+        // limit 0-127
+        if (tuningSelection[selection].getNeckDownCC() > 0) {
+          tuningSelection[selection].setNeckDownCC(-1);
+        } else {
+          // Do nothing because min of 0 reached
+        }
+      }
+      // Change Neck Down Off Value
+      else if (selectedCC == 4) {
+        // limit 0-127
+        if (tuningSelection[selection].getNeckDownOffValue() > 0) {
+          tuningSelection[selection].setNeckDownOffValue(-1);
+        } else {
+          // Do nothing because min of 0 reached
+        }
+      }
+      // Change Neck Down On Value
+      else if (selectedCC == 5) {
+        // limit 0-127
+        if (tuningSelection[selection].getNeckDownOnValue() > 0) {
+          tuningSelection[selection].setNeckDownOnValue(-1);
+        } else {
+          // Do nothing because min of 0 reached
+        }
+      }
+    }
+
+
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Change Neck Up Off Value
+    // else if (i == 16 && menuStep == 4) {
+    // }
+
+
+    // // Change Neck Up On Value
+    // else if (i == 16 && menuStep == 4) {
+    //   if (selectedCC == 2) {
+    //     // limit 0-127
+    //     if (tuningSelection[selection].getNeckUpOnValue() > 0) {
+    //       tuningSelection[selection].setNeckUpOnValue(-1);
+    //     } else {
+    //       // Do nothing because min of 0 reached
+    //     }
+    //   }
+    // }
+    // // Change Neck Down CC
+    // else if (i == 16 && menuStep == 4) {
+
+    // }
+    // // Change Neck Down Off Value
+    else if (i == 16 && menuStep == 4) {
+    }
+    // // Change Neck Down On Value
+    // else if (i == 16 && menuStep == 4) {
+
+    // }
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     // Down Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Left Button ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Scroll left through notes

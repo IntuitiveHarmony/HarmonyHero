@@ -50,6 +50,9 @@ uint8_t selectedNote = 0;     // Note to edit, based off index
 uint8_t selectedCC = 0;       // CC to edit 0-5 | up 0-2  down 3-5
 uint8_t paramUpdated = 0;     // Keep track of when to save
 uint8_t saveChangesFlag = 0;  // Keep track of when to display save changes screen
+// Define constants for LED blinking
+const unsigned long blinkInterval = 450;  // Blink interval in milliseconds
+unsigned long previousMillis = 0;  // Variable to store the last time LED was updated
 
 // ~~~~~~~~~~~~~~~~~~~
 // Selector Parameters
@@ -67,7 +70,7 @@ class Tuning {
 private:
   // Default values can be changed by the user
   byte notes[10] = {};
-  byte channel = 12;
+  byte channel = 14;
   byte velocity = 127;
 
   // 4 user assignable CC params tied to the strum switches
@@ -264,6 +267,8 @@ void setup() {
 
   pinMode(menuLED, OUTPUT);
 
+  // Uncomment to initialize the EEPROM Data
+  // EEPROM.put(INIT_FLAG_ADDRESS, 0);
 
   // Check the initialization flag in EEPROM
   byte initFlag;
@@ -291,6 +296,8 @@ void setup() {
 void loop() {
 
 
+  Serial.print("Param ");
+  Serial.println(paramUpdated);
   Serial.print("Display ");
   Serial.println(displayStep);
   Serial.print("Menu ");
@@ -359,7 +366,7 @@ void handleButtonPress(uint8_t i) {
   else if (i >= 14 && i <= 17) {
     // Up Button ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Keep track of when to save
-    if (menuStep > 0) {
+    if (i == 14 && menuStep > 0) {
       paramUpdated = 1;
     }
     // change the MIDI channel up
@@ -688,7 +695,7 @@ void handleButtonPress(uint8_t i) {
       }
     }
     // Keep track of when to save
-    if (menuStep > 0) {
+    if (i == 16 && menuStep > 0) {
       paramUpdated = 1;
     }
     // Down Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -721,7 +728,7 @@ void handleButtonPress(uint8_t i) {
   if (i == 18) {
     // To confirm Save
     if (saveChangesFlag == 1) {
-      
+
       confirmSave();
     }
     // Make sure menu is toggled on
@@ -1154,9 +1161,26 @@ void loadTuningFromEEPROM(int selection) {
 }
 
 void lightMenuLED() {
-  if (menuStep > 0) {
+  unsigned long currentMillis = millis();
+
+  if (paramUpdated == 1) {
+    // Blink the LED
+    if (currentMillis - previousMillis >= blinkInterval) {
+      // Save the current time
+      previousMillis = currentMillis;
+
+      // Toggle the LED state
+      if (digitalRead(menuLED) == HIGH) {
+        digitalWrite(menuLED, LOW);
+      } else {
+        digitalWrite(menuLED, HIGH);
+      }
+    }
+  } else if (menuStep > 0) {
+    // Turn on the LED
     digitalWrite(menuLED, HIGH);
   } else {
+    // Turn off the LED
     digitalWrite(menuLED, LOW);
   }
 }

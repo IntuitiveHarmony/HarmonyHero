@@ -550,6 +550,13 @@ void handleButtonPress(uint8_t i) {
         }
       }
     }
+    // Transpose all notes one semitone up
+    if (i == 14 && menuStep == 0) {
+      // check to make sure notes don't go above 127
+      if (tuningSelection[selection].getHighestNote() <= 126) {
+        tuningSelection[selection].transposeAllNotesUp(1);
+      }
+    }
     // Up Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Right Button ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Scroll right through notes
@@ -569,6 +576,13 @@ void handleButtonPress(uint8_t i) {
         selectedCC++;
       } else {
         selectedCC = 0;
+      }
+    }
+    // Transpose all notes one Octave up
+    if (i == 15 && menuStep == 0) {
+      // check to make sure notes don't go above 127
+      if (tuningSelection[selection].getHighestNote() <= 115) {
+        tuningSelection[selection].transposeAllNotesUp(12);
       }
     }
     // Right Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -725,12 +739,13 @@ void handleButtonPress(uint8_t i) {
       }
     }
     // Transpose all notes one semitone down
-    if (i == 16) {
+    if (i == 16 && menuStep == 0) {
       // check to make sure notes don't go below 0
       if (tuningSelection[selection].getLowestNote() >= 1) {
         tuningSelection[selection].transposeAllNotesUp(-1);
       }
     }
+
     // Keep track of when to save
     if (i == 16 && menuStep > 0) {
       paramUpdated = 1;
@@ -757,10 +772,11 @@ void handleButtonPress(uint8_t i) {
       }
     }
     // Transpose all notes one octave down
-    if (i == 17) {
+    if (i == 17 && menuStep == 0) {
       // check to make sure notes don't go below 0
       if (tuningSelection[selection].getLowestNote() >= 12) {
         tuningSelection[selection].transposeAllNotesUp(-12);
+        paramUpdated = 1;
       }
     }
     // Left Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -824,7 +840,7 @@ void handleButtonPress(uint8_t i) {
     // Turn on the edit menu
     if (menuStep == 0) {
       menuStep++;
-    } else {
+    } else if (menuStep == 0) {
       // There have been changes to params
       if (paramUpdated == 1) {
         saveChangesFlag = 1;

@@ -33,6 +33,12 @@ uint8_t enableMux2 = 10;
 // common signal
 uint8_t muxCommon = 7;
 
+
+// ~~~~~~~~~~~~~~~~~~~~~~
+// Main Screen Parameters
+// ~~~~~~~~~~~~~~~~~~~~~~
+uint8_t displayStep = 0;  // 0-Notes 1-Neck  2-bridge
+
 // ~~~~~~~~~~~~~~~
 // Menu Parameters
 // ~~~~~~~~~~~~~~~
@@ -259,16 +265,25 @@ void setup() {
 // Arduino Loop
 // ~~~~~~~~~~~~
 void loop() {
+
+  Serial.print("Display Step ");
+  Serial.println(displayStep);
+  Serial.print("Menu Step ");
+  Serial.println(menuStep);
+
+
   readPots();
   buttonMux();
+  // Edit menu and display menus have different lengths
+  if (menuStep > 0) {
+    syncDisplayMenuStep();
+  }
   // Normally the Notes and Velocity will display
-  if (menuStep < 4) {
+  if (displayStep == 0) {
     displayTuningHeader();
     displayNotes();
     displayVelocity();
-  }
-  // The edit menu is active on steps 4 and 5
-  else {
+  } else if (displayStep > 0) {
     displayEditStrums();
   }
   lightMenuLED();
@@ -420,9 +435,9 @@ void handleButtonPress(uint8_t i) {
     // Left Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   }
   // ~~~~~~~~~~~~
-  // Menu / Octave Buttons
+  // Menu / Display Buttons
   // ~~~~~~~~~~~~
-  // Start Button (octave up) ~~~~~~~~~~~~~~~~~~~~~~~~
+  // Start Button ~~~~~~~~~~~~~~~~~~~~~~~~
   else if (i == 18) {
     // Make sure menu is toggled on
     if (menuStep > 0) {
@@ -432,13 +447,18 @@ void handleButtonPress(uint8_t i) {
       } else if (menuStep > 0) {
         menuStep = 1;
       }
-      // Move all notes up an octave
-      else {
-        // Octave up logic
+    }
+    // Switch What Info to Display in main screen
+    else {
+      // Limit to 1-2
+      if (displayStep < 2) {
+        displayStep++;
+      } else if (displayStep > 0) {
+        displayStep = 0;
       }
     }
   }
-  // Select Button (octave down) ~~~~~~~~~~~~~~~~~~
+  // Select Button ~~~~~~~~~~~~~~~~~~
   else if (i == 19) {
     // Make sure menu is toggled on
     if (menuStep > 0) {
@@ -448,9 +468,14 @@ void handleButtonPress(uint8_t i) {
       } else if (menuStep > 0) {
         menuStep = 5;
       }
-      // Move all notes down an octave
-      else {
-        // Octave up logic
+    }
+    // Switch what info to display in main screen
+    else {
+      // Limit to 0-2
+      if (displayStep > 0) {
+        displayStep--;
+      } else {
+        displayStep = 2;
       }
     }
   }
@@ -633,12 +658,64 @@ void displayVelocity() {
 void displayEditStrums() {
   display.clearDisplay();
   displayTuningHeader();
+  display.setCursor(0, 15);
+  if (displayStep == 1) {
+    display.print(F(" Neck Up: "));
+    display.setCursor(0, 28);
+    display.print(F("C: "));
+    display.print(tuningSelection[selection].getNeckUpCC());
+    display.print(F(" X: "));
+    display.print(tuningSelection[selection].getNeckUpOffValue());
+    display.print(F(" O: "));
+    display.print(tuningSelection[selection].getNeckUpOnValue());
+
+    display.setCursor(0, 40);
+    display.print(F(" Neck Down: "));
+    display.setCursor(0, 55);
+    display.print(F("C: "));
+    display.print(tuningSelection[selection].getNeckDownCC());
+    display.print(F(" X: "));
+    display.print(tuningSelection[selection].getNeckDownOffValue());
+    display.print(F(" O: "));
+    display.print(tuningSelection[selection].getNeckDownOnValue());
+
+  } else if (displayStep == 2) {
+    display.print(F(" Bridge Up: "));
+    display.setCursor(0, 28);
+    display.print(F("C: "));
+    display.print(tuningSelection[selection].getBridgeUpCC());
+    display.print(F(" X: "));
+    display.print(tuningSelection[selection].getBridgeUpOffValue());
+    display.print(F(" O: "));
+    display.print(tuningSelection[selection].getBridgeUpOnValue());
+
+    display.setCursor(0, 40);
+    display.print(F(" Bridge Down: "));
+    display.setCursor(0, 55);
+    display.print(F("C: "));
+    display.print(tuningSelection[selection].getBridgeDownCC());
+    display.print(F(" X: "));
+    display.print(tuningSelection[selection].getBridgeDownOffValue());
+    display.print(F(" O: "));
+    display.print(tuningSelection[selection].getBridgeDownOnValue());
+  }
 }
 
 void readPots() {
   // Read the "5 way" selection Pot, map it and assign it. -1 to sync with index of tuningSelection array
   uint8_t selectVoltage = analogRead(selectPot);
   selection = map(selectVoltage, 15, 215, 1, 5) - 1;
+}
+
+// This keeps track of the different lengths for the display and edit menu
+void syncDisplayMenuStep() {
+  if (menuStep == 4) {
+    displayStep = 1;
+  } else if (menuStep == 5) {
+    displayStep = 2;
+  } else if (menuStep < 4) {
+    displayStep = 0;
+  }
 }
 
 void lightMenuLED() {

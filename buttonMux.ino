@@ -341,7 +341,7 @@ void handleButtonPress(uint8_t i) {
       // limit 0-127
       if (tuningSelection[selection].getNote(selectedNote) < 127) {
         // Change note on the fly if it being held down, will take care of MIDI note off errors
-        if (buttonBeingHeld() > 0) {
+        if (buttonBeingHeld() > 0 && buttonBeingHeld() <= 9) {  // restrict to the note triggers
           uint8_t heldNote = buttonBeingHeld();
           handleButtonRelease(heldNote);                           // Turn off held note
           tuningSelection[selection].changeNote(selectedNote, 1);  // update the note in array
@@ -383,7 +383,7 @@ void handleButtonPress(uint8_t i) {
       // limit 0-127
       if (tuningSelection[selection].getNote(selectedNote) > 0) {
         // Change note on the fly if it being held down, will take care of MIDI note off errors
-        if (buttonBeingHeld() > 0) {
+        if (buttonBeingHeld() > 0 && buttonBeingHeld() <= 9) {  // restrict to the note triggers
           uint8_t heldNote = buttonBeingHeld();
           handleButtonRelease(heldNote);                            // Turn off held note
           tuningSelection[selection].changeNote(selectedNote, -1);  // update the note in array

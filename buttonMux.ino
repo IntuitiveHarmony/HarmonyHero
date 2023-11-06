@@ -3,7 +3,7 @@
 
 #include <EEPROM.h>  // To save variables across power cycle
 // Define a flag address in EEPROM
-#define INIT_FLAG_ADDRESS 0
+#define INIT_FLAG_ADDRESS 30
 
 #include <MIDI.h>  // Add Midi Library
 
@@ -290,9 +290,11 @@ void setup() {
 // ~~~~~~~~~~~~
 void loop() {
 
-  Serial.print("Selection ");
-  Serial.println(selection);
 
+  Serial.print("Display ");
+  Serial.println(displayStep);
+  Serial.print("Menu ");
+  Serial.println(menuStep);
 
   readPots();
   buttonMux();
@@ -719,6 +721,7 @@ void handleButtonPress(uint8_t i) {
   if (i == 18) {
     // To confirm Save
     if (saveChangesFlag == 1) {
+      
       confirmSave();
     }
     // Make sure menu is toggled on
@@ -731,8 +734,8 @@ void handleButtonPress(uint8_t i) {
       }
     }
     // Switch What Info to Display in main screen
-    else {
-      // Limit to 1-2
+    else if (paramUpdated == 0) {
+      // Limit to 0-2
       if (displayStep < 2) {
         displayStep++;
       } else if (displayStep > 0) {
@@ -756,7 +759,7 @@ void handleButtonPress(uint8_t i) {
       }
     }
     // Switch what info to display in main screen
-    else {
+    else if (paramUpdated == 0) {
       // Limit to 0-2
       if (displayStep > 0) {
         displayStep--;
@@ -1086,6 +1089,7 @@ void displayEditStrums() {
 }
 
 void displaySaveChanges() {
+  menuStep = 0;
   display.clearDisplay();
 
   display.setCursor(0, 0);
@@ -1116,26 +1120,13 @@ void confirmSave() {
   display.print(F(" Changes Saved! "));
   display.display();
   saveTuningToEEPROM(selection);
-
-  Tuning tempTuning(notes1);
-  loadTuningFromEEPROM(selection);
-  tempTuning = tuningSelection[selection];
-  Serial.print("Read from EEPROM after save - Tuning ");
-  Serial.print(selection);
-  Serial.print(": ");
-  for (int j = 0; j < 10; ++j) {
-    Serial.print(tempTuning.getNote(j));
-    Serial.print(" ");
-  }
-  Serial.print("Channel: ");
-  Serial.print(tempTuning.getChannel());
-  Serial.println();
-
   delay(1000);
   // Reset flags
+  menuStep = 0;
+  menuStep = 0;
   saveChangesFlag = 0;
   paramUpdated = 0;
-  menuStep = 0;
+  displayStep = 0;
 }
 void cancelSave() {
   display.clearDisplay();
@@ -1146,9 +1137,10 @@ void cancelSave() {
   delay(1000);
 
   // Reset flags
+  menuStep = 0;
   saveChangesFlag = 0;
   paramUpdated = 0;
-  menuStep = 0;
+  displayStep = 0;
 }
 
 // Store tuning in EEPROM

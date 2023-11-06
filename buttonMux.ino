@@ -2,6 +2,8 @@
 #include <Adafruit_SSD1306.h>  // For display
 
 #include <EEPROM.h>  // To save variables across power cycle
+// Define a flag address in EEPROM
+#define INIT_FLAG_ADDRESS 0
 
 #include <MIDI.h>  // Add Midi Library
 
@@ -43,9 +45,11 @@ uint8_t displayStep = 0;  // 0-Notes 1-Neck  2-bridge
 // Menu Parameters
 // ~~~~~~~~~~~~~~~
 uint8_t menuLED = 6;
-uint8_t menuStep = 0;      // 0-Home 1-Channel 2-Notes 3-velocity 4-StrumSwitches
-uint8_t selectedNote = 0;  // Note to edit, based off index
-uint8_t selectedCC = 0;    // CC to edit 0-5 | up 0-2  down 3-5
+uint8_t menuStep = 0;         // 0-Home 1-Channel 2-Notes 3-velocity 4-StrumSwitches
+uint8_t selectedNote = 0;     // Note to edit, based off index
+uint8_t selectedCC = 0;       // CC to edit 0-5 | up 0-2  down 3-5
+uint8_t paramUpdated = 0;     // Keep track of when to save
+uint8_t saveChangesFlag = 0;  // Keep track of when to display save changes screen
 
 // ~~~~~~~~~~~~~~~~~~~
 // Selector Parameters
@@ -211,8 +215,8 @@ byte notes4[10] = { 60, 62, 63, 65, 67, 69, 71, 72, 74, 76 };
 
 // Mixolydian Scale
 // MIDI notes: C4, D4, E4, F4, G4, A4, B4, C5, D5, E5
-// byte notes5[10] = { 60, 62, 64, 65, 67, 69, 71, 72, 74, 76 };
-byte notes5[10] = { 120, 127, 124, 125, 67, 115, 111, 123, 120, 116 };
+byte notes5[10] = { 60, 62, 64, 65, 67, 69, 71, 72, 74, 76 };
+// byte notes5[10] = { 120, 127, 124, 125, 67, 115, 111, 123, 120, 116 };
 
 // Array of all the tuning instances available
 Tuning tuningSelection[5] = {
@@ -228,7 +232,6 @@ Tuning tuningSelection[5] = {
 // Arduino Setup
 // ~~~~~~~~~~~~~
 void setup() {
-
   Serial.begin(9600);
   // Initialize display
   if (!display.begin(SSD1306_SWITCHCAPVCC, OLED_I2C_ADDRESS)) {
@@ -260,6 +263,26 @@ void setup() {
   pinMode(selectPot, INPUT_PULLUP);
 
   pinMode(menuLED, OUTPUT);
+
+
+  // Check the initialization flag in EEPROM
+  byte initFlag;
+  EEPROM.get(INIT_FLAG_ADDRESS, initFlag);
+  // If the flag is not set, perform the initialization
+  if (initFlag != 1) {
+    // Save the initial tunings in EEPROM
+    for (int i = 0; i < 5; ++i) {
+      saveTuningToEEPROM(i);
+      delay(10);  // Add a delay between EEPROM writes
+    }
+    // Set the flag to indicate initialization has been done
+    initFlag = 1;
+    EEPROM.put(INIT_FLAG_ADDRESS, initFlag);
+  }
+  // Load tuning data from EEPROM
+  for (int i = 0; i < 5; ++i) {
+    loadTuningFromEEPROM(i);
+  }
 }
 
 // ~~~~~~~~~~~~
@@ -267,12 +290,13 @@ void setup() {
 // ~~~~~~~~~~~~
 void loop() {
 
-  Serial.print("Selected CC ");
-  Serial.println(selectedCC);
+  Serial.print("Selection ");
+  Serial.println(selection);
 
 
   readPots();
   buttonMux();
+  lightMenuLED();
   // Edit menu and display menus have different lengths
   if (menuStep > 0) {
     syncDisplayMenuStep();
@@ -285,8 +309,9 @@ void loop() {
   } else if (displayStep > 0) {
     displayEditStrums();
   }
-  lightMenuLED();
-
+  if (saveChangesFlag == 1) {
+    displaySaveChanges();
+  }
   // Update the display at the end of the loop
   display.display();
 }
@@ -331,6 +356,10 @@ void handleButtonPress(uint8_t i) {
   // ~~~~~~~~~~~~~~~~~~~
   else if (i >= 14 && i <= 17) {
     // Up Button ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Keep track of when to save
+    if (menuStep > 0) {
+      paramUpdated = 1;
+    }
     // change the MIDI channel up
     if (i == 14 && menuStep == 1) {
       // limit 1-16
@@ -656,6 +685,10 @@ void handleButtonPress(uint8_t i) {
         }
       }
     }
+    // Keep track of when to save
+    if (menuStep > 0) {
+      paramUpdated = 1;
+    }
     // Down Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Left Button ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Scroll left through notes
@@ -683,7 +716,11 @@ void handleButtonPress(uint8_t i) {
   // Menu / Display Buttons
   // ~~~~~~~~~~~~
   // Start Button ~~~~~~~~~~~~~~~~~~~~~~~~
-  else if (i == 18) {
+  if (i == 18) {
+    // To confirm Save
+    if (saveChangesFlag == 1) {
+      confirmSave();
+    }
     // Make sure menu is toggled on
     if (menuStep > 0) {
       // Limit to 1-5
@@ -704,7 +741,11 @@ void handleButtonPress(uint8_t i) {
     }
   }
   // Select Button ~~~~~~~~~~~~~~~~~~
-  else if (i == 19) {
+  if (i == 19) {
+    // for cancel save function
+    if (saveChangesFlag == 1) {
+      cancelSave();
+    }
     // Make sure menu is toggled on
     if (menuStep > 0) {
       // Limit to 1-5
@@ -725,11 +766,20 @@ void handleButtonPress(uint8_t i) {
     }
   }
   // Menu Toggle / Save Button ~~~~~~~~~~~~~~~~~~~~~~~~~~
-  else if (i == 20) {
+  if (i == 20) {
+    // Turn on the edit menu
     if (menuStep == 0) {
       menuStep++;
     } else {
-      menuStep = 0;
+      // There have been changes to params
+      if (paramUpdated == 1) {
+        saveChangesFlag = 1;
+      }
+
+      // Close the edit menu if no changes
+      if (paramUpdated == 0) {
+        menuStep = 0;
+      }
     }
   }
 
@@ -1035,6 +1085,13 @@ void displayEditStrums() {
   }
 }
 
+void displaySaveChanges() {
+  display.clearDisplay();
+
+  display.setCursor(0, 0);
+  display.print(F(" Save Changes? "));
+}
+
 void readPots() {
   // Read the "5 way" selection Pot, map it and assign it. -1 to sync with index of tuningSelection array
   uint8_t selectVoltage = analogRead(selectPot);
@@ -1050,6 +1107,58 @@ void syncDisplayMenuStep() {
   } else if (menuStep < 4) {
     displayStep = 0;
   }
+}
+
+// Save Functions
+void confirmSave() {
+  display.clearDisplay();
+  display.setCursor(0, 26);
+  display.print(F(" Changes Saved! "));
+  display.display();
+  saveTuningToEEPROM(selection);
+
+  Tuning tempTuning(notes1);
+  loadTuningFromEEPROM(selection);
+  tempTuning = tuningSelection[selection];
+  Serial.print("Read from EEPROM after save - Tuning ");
+  Serial.print(selection);
+  Serial.print(": ");
+  for (int j = 0; j < 10; ++j) {
+    Serial.print(tempTuning.getNote(j));
+    Serial.print(" ");
+  }
+  Serial.print("Channel: ");
+  Serial.print(tempTuning.getChannel());
+  Serial.println();
+
+  delay(1000);
+  // Reset flags
+  saveChangesFlag = 0;
+  paramUpdated = 0;
+  menuStep = 0;
+}
+void cancelSave() {
+  display.clearDisplay();
+  display.setCursor(0, 26);
+  display.print(F(" Changes Canceled! "));
+  display.display();
+  loadTuningFromEEPROM(selection);
+  delay(1000);
+
+  // Reset flags
+  saveChangesFlag = 0;
+  paramUpdated = 0;
+  menuStep = 0;
+}
+
+// Store tuning in EEPROM
+void saveTuningToEEPROM(int selection) {
+  EEPROM.put(selection * sizeof(Tuning), tuningSelection[selection]);
+  delay(10);  // Add a delay between EEPROM writes
+}
+// Load tuning from EEPROM
+void loadTuningFromEEPROM(int selection) {
+  EEPROM.get(selection * sizeof(Tuning), tuningSelection[selection]);
 }
 
 void lightMenuLED() {

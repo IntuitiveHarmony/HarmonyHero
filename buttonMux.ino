@@ -68,21 +68,21 @@ private:
 
   // 4 user assignable CC params tied to the strum switches
   // Default Values provided, may not work as anticipated depending on individual synth's local CC routing
-  byte neckUpCC = 127;  // MOD wheel
-  byte neckUpOff = 127;
-  byte neckUpOn = 127;
+  byte neckUpCC = 60;  // MOD wheel
+  byte neckUpOff = 60;
+  byte neckUpOn = 60;
 
-  byte neckDownCC = 127;  // Portamento
-  byte neckDownOffValue = 127;
-  byte neckDownOnValue = 127;
+  byte neckDownCC = 60;  // Portamento
+  byte neckDownOffValue = 60;
+  byte neckDownOnValue = 60;
 
-  byte bridgeUpCC = 70;  // LFO Depth
-  byte bridgeUpOffValue = 64;
-  byte bridgeUpOnValue = 63;
+  byte bridgeUpCC = 60;  // LFO Depth
+  byte bridgeUpOffValue = 60;
+  byte bridgeUpOnValue = 60;
 
-  byte bridgeDownCC = 7;  // Volume
-  byte bridgeDownOffValue = 127;
-  byte bridgeDownOnValue = 0;
+  byte bridgeDownCC = 60;  // Volume
+  byte bridgeDownOffValue = 60;
+  byte bridgeDownOnValue = 60;
 
 public:
   // constructor
@@ -912,27 +912,27 @@ void displayEditStrums() {
     display.print(F(" Neck Up: "));
     display.setTextColor(WHITE, BLACK);  // Reset text color
     display.setCursor(0, 28);
-    display.print(F("C: "));
     // Highlight if selected
     if (selectedCC == 0 && menuStep >= 4) {
       display.setTextColor(BLACK, WHITE);
     }
+    display.print(F("C: "));
     display.print(tuningSelection[selection].getNeckUpCC());
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
-    display.print(F(" X: "));
     // Highlight if selected
     if (selectedCC == 1) {
       display.setTextColor(BLACK, WHITE);
     }
+    display.print(F(" X: "));
     display.print(tuningSelection[selection].getNeckUpOffValue());
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
-    display.print(F(" O: "));
     // Highlight if selected
     if (selectedCC == 2 && menuStep >= 4) {
       display.setTextColor(BLACK, WHITE);
     }
+    display.print(F(" O: "));
     display.print(tuningSelection[selection].getNeckUpOnValue());
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
@@ -944,27 +944,27 @@ void displayEditStrums() {
     display.print(F(" Neck Down: "));
     display.setTextColor(WHITE, BLACK);  // Reset text color
     display.setCursor(0, 55);
-    display.print(F("C: "));
     // Highlight if selected
     if (selectedCC == 3 && menuStep >= 4) {
       display.setTextColor(BLACK, WHITE);
     }
+    display.print(F("C: "));
     display.print(tuningSelection[selection].getNeckDownCC());
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
-    display.print(F(" X: "));
     // Highlight if selected
     if (selectedCC == 4 && menuStep >= 4) {
       display.setTextColor(BLACK, WHITE);
     }
+    display.print(F(" X: "));
     display.print(tuningSelection[selection].getNeckDownOffValue());
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
     // Highlight if selected
-    display.print(F(" O: "));
     if (selectedCC == 5 && menuStep >= 4) {
       display.setTextColor(BLACK, WHITE);
     }
+    display.print(F(" O: "));
     display.print(tuningSelection[selection].getNeckDownOnValue());
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
@@ -976,27 +976,27 @@ void displayEditStrums() {
     display.print(F(" Bridge Up: "));
     display.setTextColor(WHITE, BLACK);  // Reset text color
     display.setCursor(0, 28);
-    display.print(F("C: "));
     // Highlight if selected
     if (selectedCC == 0 && menuStep >= 4) {
       display.setTextColor(BLACK, WHITE);
     }
+    display.print(F("C: "));
     display.print(tuningSelection[selection].getBridgeUpCC());
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
-    display.print(F(" X: "));
     // Highlight if selected
     if (selectedCC == 1 && menuStep >= 4) {
       display.setTextColor(BLACK, WHITE);
     }
+    display.print(F(" X: "));
     display.print(tuningSelection[selection].getBridgeUpOffValue());
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
-    display.print(F(" O: "));
     // Highlight if selected
     if (selectedCC == 2 && menuStep >= 4) {
       display.setTextColor(BLACK, WHITE);
     }
+    display.print(F(" O: "));
     display.print(tuningSelection[selection].getBridgeUpOnValue());
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
@@ -1009,28 +1009,28 @@ void displayEditStrums() {
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
     display.setCursor(0, 55);
-    display.print(F("C: "));
     // Highlight if selected
     if (selectedCC == 3 && menuStep >= 4) {
       display.setTextColor(BLACK, WHITE);
     }
+    display.print(F("C: "));
     display.print(tuningSelection[selection].getBridgeDownCC());
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
-    display.print(F(" X: "));
     // Highlight if selected
     if (selectedCC == 4 && menuStep >= 4) {
       display.setTextColor(BLACK, WHITE);
     }
+    display.print(F(" X: "));
     display.print(tuningSelection[selection].getBridgeDownOffValue());
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
     // Highlight if selected
-    display.print(F(" O: "));
     if (selectedCC == 5 && menuStep >= 4) {
       display.setTextColor(BLACK, WHITE);
     }
-    display.print(tuningSelection[selection].getNeckDownOnValue());
+    display.print(F(" O: "));
+    display.print(tuningSelection[selection].getBridgeDownOnValue());
     display.setTextColor(WHITE, BLACK);  // Reset text color
   }
 }

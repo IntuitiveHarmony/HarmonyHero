@@ -52,7 +52,7 @@ uint8_t paramUpdated = 0;     // Keep track of when to save
 uint8_t saveChangesFlag = 0;  // Keep track of when to display save changes screen
 // Define constants for LED blinking
 const unsigned long blinkInterval = 450;  // Blink interval in milliseconds
-unsigned long previousMillis = 0;  // Variable to store the last time LED was updated
+unsigned long previousMillis = 0;         // Variable to store the last time LED was updated
 
 // ~~~~~~~~~~~~~~~~~~~
 // Selector Parameters
@@ -70,7 +70,7 @@ class Tuning {
 private:
   // Default values can be changed by the user
   byte notes[10] = {};
-  byte channel = 14;
+  byte channel = 1;
   byte velocity = 127;
 
   // 4 user assignable CC params tied to the strum switches
@@ -104,6 +104,36 @@ public:
   void changeNote(uint8_t index, byte change) {
     notes[index] += change;
   }
+  byte getLowestNote() {
+    byte minNote = notes[0];
+    for (int i = 1; i < sizeof(notes); ++i) {
+      if (notes[i] < minNote) {
+        minNote = notes[i];
+      }
+    }
+    return minNote;
+  }
+  byte getHighestNote() {
+    byte maxNote = notes[0];
+    for (int i = 1; i < sizeof(notes); ++i) {
+      if (notes[i] > maxNote) {
+        maxNote = notes[i];
+      }
+    }
+    return maxNote;
+  }
+  void transposeAllNotesUp(byte semitone) {
+    for (int i = 0; i < sizeof(notes); ++i) {
+      notes[i] += semitone;
+    }
+  }
+
+  void transposeAllNotesDown(byte semitone) {
+    for (int i = 0; i < sizeof(notes); ++i) {
+      notes[i] -= semitone;
+    }
+  }
+
   // Channel Methods
   byte getChannel() {
     return channel;
@@ -694,6 +724,13 @@ void handleButtonPress(uint8_t i) {
         }
       }
     }
+    // Transpose all notes one semitone down
+    if (i == 16) {
+      // check to make sure notes don't go below 0
+      if (tuningSelection[selection].getLowestNote() >= 1) {
+        tuningSelection[selection].transposeAllNotesUp(-1);
+      }
+    }
     // Keep track of when to save
     if (i == 16 && menuStep > 0) {
       paramUpdated = 1;
@@ -709,14 +746,21 @@ void handleButtonPress(uint8_t i) {
         selectedNote = 9;
       }
     }
-    // Scroll right through CC values
+    // Scroll left through CC values
     // for both neck and bridge
-    else if (i == 17 && menuStep >= 4) {
+    if (i == 17 && menuStep >= 4) {
       // Limit to 0-5
       if (selectedCC > 0) {
         selectedCC--;
       } else {
         selectedCC = 5;
+      }
+    }
+    // Transpose all notes one octave down
+    if (i == 17) {
+      // check to make sure notes don't go below 0
+      if (tuningSelection[selection].getLowestNote() >= 12) {
+        tuningSelection[selection].transposeAllNotesUp(-12);
       }
     }
     // Left Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

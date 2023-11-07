@@ -318,17 +318,9 @@ void setup() {
 // Arduino Loop
 // ~~~~~~~~~~~~
 void loop() {
-
-
-  Serial.print("Param ");
-  Serial.println(paramUpdated);
-  Serial.print("Display ");
-  Serial.println(displayStep);
-  Serial.print("Menu ");
-  Serial.println(menuStep);
-
   readPots();
   buttonMux();
+  updateHeldNotes();
   lightMenuLED();
   // Edit menu and display menus have different lengths
   if (menuStep > 0) {
@@ -832,13 +824,6 @@ void handleButtonPress(uint8_t i) {
     }
   }
 
-  // display.setCursor(0, 16);
-  // display.print(F("Button "));
-  // display.setCursor(39, 16);
-  // display.print(i);
-  // display.setCursor(44, 16);
-  // display.print(F(" Pressed!"));
-  // display.display();  // Update the display
 
   Serial.print("Button ");
   Serial.print(i);
@@ -926,34 +911,58 @@ void enableMux(uint8_t mux) {
       break;
   }
 }
+const int MAX_HELD_NOTES = 10;  // Maximum number of held notes
+
+uint8_t heldNotes[MAX_HELD_NOTES] = { 0 };  // Array to store held notes
+int numHeldNotes = 0;                       // Number of currently held notes
+
 
 // Change note on the fly if it being held down, will take care of MIDI note off errors
 void handleHeldNotesWhileTransposing(byte semitones) {
-  if (buttonBeingHeld() > 0 && buttonBeingHeld() <= 9) {  // restrict to the note triggers
-    uint8_t heldNote = buttonBeingHeld();
-    handleButtonRelease(heldNote);  // Turn off held note
-    if (displayStep == 0 && menuStep == 0) {
-      tuningSelection[selection].transposeAllNotes(semitones);
+  // Check if any notes are being held
+  if (numHeldNotes > 0) {
+    for (int i = 0; i < numHeldNotes; ++i) {
+      uint8_t heldNote = heldNotes[i];
+      handleButtonRelease(heldNote);  // Turn off held note
     }
-    tuningSelection[selection].changeNote(selectedNote, semitones);  // update the note in array
-    handleButtonPress(heldNote);                                     // Play new note
+    // This changes the entire array of notes
+    if (displayStep == 0 && menuStep == 0) {  // check if on main screen
+      for (int i = 0; i < 10; ++i) {          // loop through all notes
+        tuningSelection[selection].changeNote(i, semitones);
+      }
+    }
+    // Single Note change
+    else if (menuStep == 2) {                                          // Edit single notes menu selection
+      tuningSelection[selection].changeNote(selectedNote, semitones);  // update single note in array
+    }
+    // Play new notes
+    for (int i = 0; i < numHeldNotes; ++i) {
+      uint8_t heldNote = heldNotes[i];
+      handleButtonPress(heldNote);
+    }
+    // Clear the array after handling held notes
+    // numHeldNotes = 0;
   }
   // No held notes, simply update
-  else {
+  else if (numHeldNotes == 0) {
+    // This targets changing the entire array at once
     if (displayStep == 0 && menuStep == 0) {
       tuningSelection[selection].transposeAllNotes(semitones);
     }
-    tuningSelection[selection].changeNote(selectedNote, semitones);
+    // Single Note change
+    else {
+      tuningSelection[selection].changeNote(selectedNote, semitones);
+    }
   }
 }
 
-uint8_t buttonBeingHeld() {
-  // only loop through the note triggers
+void updateHeldNotes() {
+  // Update the array of held notes
+  numHeldNotes = 0;
+  // Loop through all notes to see if they are held down 
   for (int i = 0; i <= 9; ++i) {
-    Serial.print("From the held function: ");
-    Serial.println(i);
     if (previousButtonState[i] == 1) {
-      return i;
+      heldNotes[numHeldNotes++] = i; // Index of held button and update array and count
     }
   }
 }
@@ -1160,6 +1169,15 @@ void displaySaveChanges() {
 
   display.setCursor(0, 0);
   display.print(F(" Save Changes? "));
+  display.setCursor(0, 20);
+  display.print(F("Select"));
+  display.setCursor(12, 30);
+  display.print(F("NO"));
+  display.setCursor(60, 20);
+  display.print(F("Start"));
+  display.setCursor(68, 30);
+  display.print(F("YES"));
+
 }
 
 void readPots() {
@@ -1187,8 +1205,8 @@ void confirmSave() {
   display.display();
   saveTuningToEEPROM(selection);
   delay(1000);
+
   // Reset flags
-  menuStep = 0;
   menuStep = 0;
   saveChangesFlag = 0;
   paramUpdated = 0;

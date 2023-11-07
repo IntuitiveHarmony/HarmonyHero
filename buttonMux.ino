@@ -1,11 +1,20 @@
+/* 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+File:       guitarHeroHack.cpp
+Author:     Jason Horst
+Company:    Intuitive Harmony - https://github.com/IntuitiveHarmony
+Date:       November 6, 2023
+Purpose:    Using a Guitar Hero controller to build a MIDI Controller
+License:    MIT - https://opensource.org/license/mit/
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
 #include <Wire.h>              // For display
 #include <Adafruit_SSD1306.h>  // For display
 
-#include <EEPROM.h>  // To save variables across power cycle
-// Define a flag address in EEPROM
-#define INIT_FLAG_ADDRESS 30
-
 #include <MIDI.h>  // Add Midi Library
+
+#include <EEPROM.h>  // To save variables across power cycle
 
 // Define OLED parameters
 #define SCREEN_WIDTH 128
@@ -20,6 +29,9 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // Create an instance of the library with default name, serial port and settings
 MIDI_CREATE_DEFAULT_INSTANCE();
+
+// Define a flag address in EEPROM
+#define INIT_FLAG_ADDRESS 30
 
 // ~~~~~~~~~~~~~~
 // MUX Parameters
@@ -56,7 +68,7 @@ uint8_t paramUpdated = 0;     // Keep track of when to save
 uint8_t saveChangesFlag = 0;  // Keep track of when to display save changes screen
 // Define constants for LED blinking
 const unsigned long blinkInterval = 450;  // Blink interval in milliseconds
-unsigned long previousMillisLED = 0;         // Variable to store the last time LED was updated
+unsigned long previousMillisLED = 0;      // Variable to store the last time LED was updated
 
 // ~~~~~~~~~~~~~~~~~~~
 // Selector Parameters
@@ -942,7 +954,7 @@ void handleHeldNotesWhileTransposing(byte semitones) {
   // No held notes, simply update
   else if (numHeldNotes == 0) {
     // This targets changing the entire array at once
-    if (displayStep == 0 && menuStep == 0) { // Main display screen
+    if (displayStep == 0 && menuStep == 0) {  // Main display screen
       tuningSelection[selection].transposeAllNotes(semitones);
     }
     // Single Note change

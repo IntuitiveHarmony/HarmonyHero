@@ -33,6 +33,13 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 // Define a flag address in EEPROM
 #define INIT_FLAG_ADDRESS 30
 
+// ~~~~~~~~~~~~~~~~~~~~~
+// Instrument Parameters
+// ~~~~~~~~~~~~~~~~~~~~~
+const int MAJOR_VERSION = 1;
+const int MINOR_VERSION = 0;
+const int PATCH_VERSION = 0;
+
 // ~~~~~~~~~~~~~~
 // MUX Parameters
 // ~~~~~~~~~~~~~~
@@ -46,7 +53,6 @@ uint8_t enableMux1 = 14;
 uint8_t enableMux2 = 10;
 // common signal
 uint8_t muxCommon = 7;
-
 
 // ~~~~~~~~~~~~~~~~~~~~~~
 // Main Screen Parameters
@@ -288,7 +294,7 @@ void setup() {
   display.clearDisplay();  // Clear the display
 
   readPots();
-  displayTuningHeader();
+  displayStartUp(4000);  // Start screen displays name and version info
 
   MIDI.begin(MIDI_CHANNEL_OMNI);  // Initialize the Midi Library.
 
@@ -826,12 +832,19 @@ void handleButtonPress(uint8_t i) {
   // End Select Button ~~~~~~~~~~~~~~~~
   // Menu Toggle / Save Button ~~~~~~~~
   if (i == 20) {
+    // Go back inside the edit menu
+    if (saveChangesFlag == 1 && menuStep >= 0) {
+      Serial.println("Hello from go back inside");
+      menuStep = 1;
+      saveChangesFlag = 0;
+    }
     // Turn on the edit menu
-    if (menuStep == 0) {
+    else if (menuStep == 0) {
       menuStep++;
-    } else {
-      // There have been changes to params
-      if (paramUpdated == 1) {
+    }
+    else {
+      // There have been changes to params go to save screen
+      if (paramUpdated == 1 && saveChangesFlag == 0) {
         saveChangesFlag = 1;
       }
 
@@ -1178,16 +1191,44 @@ void displaySaveChanges() {
   menuStep = 0;
   display.clearDisplay();
 
-  display.setCursor(0, 0);
+  display.setCursor(5, 0);
   display.print(F(" Save Changes? "));
   display.setCursor(0, 20);
   display.print(F("Select"));
   display.setCursor(12, 30);
   display.print(F("NO"));
-  display.setCursor(60, 20);
+  display.setCursor(72, 20);
   display.print(F("Start"));
-  display.setCursor(68, 30);
+  display.setCursor(77, 30);
   display.print(F("YES"));
+  display.setCursor(42, 40);
+  display.print(F("Menu"));
+  display.setCursor(37, 50);
+  display.print(F("CANCEL"));
+
+}
+
+void displayStartUp(int miliSec) {
+  // Display splash screen for a few seconds
+  display.clearDisplay();
+  display.setTextSize(2);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0, 0);
+  display.print(F("Intuitive"));
+  display.setCursor(0, 20);
+  display.print(F("Harmony"));
+  display.setTextSize(1);  // reset Text Size
+  display.setCursor(0, 42);
+  display.print(F("Guitar Hero Hack"));
+  display.setCursor(0, 55);
+  display.print(F("Version: "));
+  display.print(MAJOR_VERSION);
+  display.print(F("."));
+  display.print(MINOR_VERSION);
+  display.print(F("."));
+  display.print(PATCH_VERSION);
+  display.display();
+  delay(miliSec);
 }
 
 void readPots() {

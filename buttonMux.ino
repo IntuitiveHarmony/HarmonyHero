@@ -122,15 +122,9 @@ public:
     }
     return maxNote;
   }
-  void transposeAllNotesUp(byte semitone) {
+  void transposeAllNotes(byte semitone) {
     for (int i = 0; i < sizeof(notes); ++i) {
       notes[i] += semitone;
-    }
-  }
-
-  void transposeAllNotesDown(byte semitone) {
-    for (int i = 0; i < sizeof(notes); ++i) {
-      notes[i] -= semitone;
     }
   }
 
@@ -423,16 +417,7 @@ void handleButtonPress(uint8_t i) {
       // limit 0-127
       if (tuningSelection[selection].getNote(selectedNote) < 127) {
         // Change note on the fly if it being held down, will take care of MIDI note off errors
-        if (buttonBeingHeld() > 0 && buttonBeingHeld() <= 9) {  // restrict to the note triggers
-          uint8_t heldNote = buttonBeingHeld();
-          handleButtonRelease(heldNote);                           // Turn off held note
-          tuningSelection[selection].changeNote(selectedNote, 1);  // update the note in array
-          handleButtonPress(heldNote);                             // Play new note
-        }
-        // No held notes, simply update
-        else {
-          tuningSelection[selection].changeNote(selectedNote, 1);
-        }
+        handleHeldNotesWhileTransposing(1);
       } else {
         // Do noting because max of 127 reached
       }
@@ -554,7 +539,7 @@ void handleButtonPress(uint8_t i) {
     if (i == 14 && displayStep == 0 && menuStep == 0) {
       // check to make sure notes don't go above 127
       if (tuningSelection[selection].getHighestNote() <= 126) {
-        tuningSelection[selection].transposeAllNotesUp(1);
+        handleHeldNotesWhileTransposing(1);
         paramUpdated = 1;
       }
     }
@@ -583,7 +568,7 @@ void handleButtonPress(uint8_t i) {
     if (i == 15 && displayStep == 0 && menuStep == 0) {
       // check to make sure notes don't go above 127
       if (tuningSelection[selection].getHighestNote() <= 115) {
-        tuningSelection[selection].transposeAllNotesUp(12);
+        handleHeldNotesWhileTransposing(12);
         paramUpdated = 1;
       }
     }
@@ -604,16 +589,7 @@ void handleButtonPress(uint8_t i) {
       // limit 0-127
       if (tuningSelection[selection].getNote(selectedNote) > 0) {
         // Change note on the fly if it being held down, will take care of MIDI note off errors
-        if (buttonBeingHeld() > 0 && buttonBeingHeld() <= 9) {  // restrict to the note triggers
-          uint8_t heldNote = buttonBeingHeld();
-          handleButtonRelease(heldNote);                            // Turn off held note
-          tuningSelection[selection].changeNote(selectedNote, -1);  // update the note in array
-          handleButtonPress(heldNote);                              // Play new note
-        }
-        // No held notes, simply update
-        else {
-          tuningSelection[selection].changeNote(selectedNote, -1);
-        }
+        handleHeldNotesWhileTransposing(-1);
       } else {
         // Do nothing because min of 0 reached
       }
@@ -744,7 +720,7 @@ void handleButtonPress(uint8_t i) {
     if (i == 16 && displayStep == 0 && menuStep == 0) {
       // check to make sure notes don't go below 0
       if (tuningSelection[selection].getLowestNote() >= 1) {
-        tuningSelection[selection].transposeAllNotesUp(-1);
+        handleHeldNotesWhileTransposing(-1);
         paramUpdated = 1;
       }
     }
@@ -778,7 +754,7 @@ void handleButtonPress(uint8_t i) {
     if (i == 17 && displayStep == 0 && menuStep == 0) {
       // check to make sure notes don't go below 0
       if (tuningSelection[selection].getLowestNote() >= 12) {
-        tuningSelection[selection].transposeAllNotesUp(-12);
+        handleHeldNotesWhileTransposing(-12);
         paramUpdated = 1;
       }
     }
@@ -948,6 +924,26 @@ void enableMux(uint8_t mux) {
       digitalWrite(enableMux1, HIGH);
       digitalWrite(enableMux2, LOW);
       break;
+  }
+}
+
+// Change note on the fly if it being held down, will take care of MIDI note off errors
+void handleHeldNotesWhileTransposing(byte semitones) {
+  if (buttonBeingHeld() > 0 && buttonBeingHeld() <= 9) {  // restrict to the note triggers
+    uint8_t heldNote = buttonBeingHeld();
+    handleButtonRelease(heldNote);  // Turn off held note
+    if (displayStep == 0 && menuStep == 0) {
+      tuningSelection[selection].transposeAllNotes(semitones);
+    }
+    tuningSelection[selection].changeNote(selectedNote, semitones);  // update the note in array
+    handleButtonPress(heldNote);                                     // Play new note
+  }
+  // No held notes, simply update
+  else {
+    if (displayStep == 0 && menuStep == 0) {
+      tuningSelection[selection].transposeAllNotes(semitones);
+    }
+    tuningSelection[selection].changeNote(selectedNote, semitones);
   }
 }
 

@@ -488,7 +488,6 @@ void handleButtonPress(uint8_t i) {
       }
     }
 
-
     // Change Bridge Up CC
     else if (i == 14 && menuStep == 5) {
       if (selectedCC == 0) {
@@ -543,6 +542,7 @@ void handleButtonPress(uint8_t i) {
         }
       }
     }
+    // ~~~~~~ End of the UP Arrow CC 👹 ~~~~~~~~~~~~~~~~
     // Transpose all notes one semitone up
     if (i == 14 && displayStep == 0 && menuStep == 0) {
       // check to make sure notes don't go above 127
@@ -723,6 +723,7 @@ void handleButtonPress(uint8_t i) {
         }
       }
     }
+    // ~~~~~~ End of the DOWN Arrow CC 👹 ~~~~~~~~~~~~~~~~
     // Transpose all notes one semitone down
     if (i == 16 && displayStep == 0 && menuStep == 0) {
       // check to make sure notes don't go below 0
@@ -767,9 +768,9 @@ void handleButtonPress(uint8_t i) {
     }
     // Left Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   }
-  // ~~~~~~~~~~~~
+  // ~~~~~~~~~~~~~~~~~~~~~~
   // Menu / Display Buttons
-  // ~~~~~~~~~~~~
+  // ~~~~~~~~~~~~~~~~~~~~~~
   // Start Button ~~~~~~~~~~~~~~~~~~~~~~~~
   if (i == 18) {
     // To confirm Save
@@ -796,7 +797,8 @@ void handleButtonPress(uint8_t i) {
       }
     }
   }
-  // Select Button ~~~~~~~~~~~~~~~~~~
+  // End Start Button ~~~~~~~~~~~~~~~~~~
+  // Select Button ~~~~~~~~~~~~~~~~~~~~~
   if (i == 19) {
     // for cancel save function
     if (saveChangesFlag == 1) {
@@ -821,7 +823,8 @@ void handleButtonPress(uint8_t i) {
       }
     }
   }
-  // Menu Toggle / Save Button ~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // End Select Button ~~~~~~~~~~~~~~~~
+  // Menu Toggle / Save Button ~~~~~~~~
   if (i == 20) {
     // Turn on the edit menu
     if (menuStep == 0) {
@@ -838,6 +841,7 @@ void handleButtonPress(uint8_t i) {
       }
     }
   }
+  // End Menu Toggle / Save Button ~~~~
 
 
   Serial.print("Button ");
@@ -851,7 +855,6 @@ void handleButtonRelease(uint8_t i) {
     MIDI.sendNoteOff(tuningSelection[selection].getNote(i), 0, tuningSelection[selection].getChannel());
   }
   // Reset the strum switches
-
   else if (i >= 10 && i <= 13) {
     // Reset neck down Switch
     if (i == 10) {
@@ -871,7 +874,6 @@ void handleButtonRelease(uint8_t i) {
     }
   }
 
-
   Serial.print("Button ");
   Serial.print(i);
   Serial.println(" Released!");
@@ -883,14 +885,14 @@ void buttonMux() {
     // Enable the appropriate MUX
     enableMux(i < 8 ? 0 : (i < 16 ? 1 : 2));
 
-    // Control the selector pins based on the binary representation of i
+    // Control the selector pins based on the binary representation of i (this all chat 😂)
+    // Checks the least significant bit (LSB) of the variable i. The & operator performs a bitwise AND operation
     digitalWrite(signal0, (i & 0x01) ? HIGH : LOW);
     digitalWrite(signal1, (i & 0x02) ? HIGH : LOW);
     digitalWrite(signal2, (i & 0x04) ? HIGH : LOW);
 
     // Read the value from the selected button
     uint8_t buttonValue = digitalRead(muxCommon);
-    // Serial.println(buttonValue);
 
     // Check for button press
     if (buttonValue == 0 && previousButtonState[i] == 0) {
@@ -907,6 +909,7 @@ void buttonMux() {
   }
 }
 
+// Use the enable pin on the Multiplexer to turn on only the MUX we want to read
 void enableMux(uint8_t mux) {
   switch (mux) {
     case 0:
@@ -964,8 +967,8 @@ void handleHeldNotesWhileTransposing(byte semitones) {
   }
 }
 
+// Update the array of held notes to help with handleHeldNotesWhileTransposing()
 void updateHeldNotes() {
-  // Update the array of held notes
   numHeldNotes = 0;
   // Loop through all notes to see if they are held down
   for (int i = 0; i <= 9; ++i) {

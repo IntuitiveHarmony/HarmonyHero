@@ -294,7 +294,7 @@ void setup() {
   display.clearDisplay();  // Clear the display
 
   readPots();
-  displayStartUp(4000);  // Start screen displays name and version info
+  displayStartUp(3000);  // Start screen displays name and version info
 
   MIDI.begin(MIDI_CHANNEL_OMNI);  // Initialize the Midi Library.
 
@@ -781,11 +781,10 @@ void handleButtonPress(uint8_t i) {
   if (i == 18) {
     // To confirm Save
     if (saveChangesFlag == 1) {
-
       confirmSave();
     }
-    // Make sure menu is toggled on
-    if (menuStep > 0) {
+    // Make sure menu is toggled on and not in the save screen
+    if (menuStep > 0 && saveChangesFlag == 0) {  // display main screen after save 🐛 hunt
       // Limit to 1-5
       if (menuStep < 5) {
         menuStep++;
@@ -794,7 +793,7 @@ void handleButtonPress(uint8_t i) {
       }
     }
     // Switch What Info to Display in main screen
-    else if (paramUpdated == 0) {
+    else if (paramUpdated == 0 && saveChangesFlag == 0) { // display main screen after save 🐛 hunt
       // Limit to 0-2
       if (displayStep < 2) {
         displayStep++;
@@ -810,8 +809,9 @@ void handleButtonPress(uint8_t i) {
     if (saveChangesFlag == 1) {
       cancelSave();
     }
-    // Make sure menu is toggled on
-    if (menuStep > 0) {
+    // Make sure menu is toggled on and not in the save screen
+    if (saveChangesFlag == 0 || menuStep > 0) { // display main screen after save 🐛 hunt
+      Serial.println("🐛🐛🐛🐛🐛🐛🐛🐛");
       // Limit to 1-5
       if (menuStep > 1) {
         menuStep--;
@@ -820,7 +820,7 @@ void handleButtonPress(uint8_t i) {
       }
     }
     // Switch what info to display in main screen
-    else if (paramUpdated == 0) {
+    else if (paramUpdated == 0 && saveChangesFlag == 0) { // display main screen after save 🐛 hunt
       // Limit to 0-2
       if (displayStep > 0) {
         displayStep--;
@@ -832,10 +832,9 @@ void handleButtonPress(uint8_t i) {
   // End Select Button ~~~~~~~~~~~~~~~~
   // Menu Toggle / Save Button ~~~~~~~~
   if (i == 20) {
-    // Go back inside the edit menu
+    // Exit the save menu without discarding changes
     if (saveChangesFlag == 1 && menuStep >= 0) {
-      Serial.println("Hello from go back inside");
-      menuStep = 1;
+      menuStep = 0;
       saveChangesFlag = 0;
     }
     // Turn on the edit menu
@@ -1188,7 +1187,6 @@ void displayEditStrums() {
 }
 
 void displaySaveChanges() {
-  menuStep = 0;
   display.clearDisplay();
 
   display.setCursor(5, 0);
@@ -1217,6 +1215,8 @@ void displayStartUp(int miliSec) {
   display.print(F("Intuitive"));
   display.setCursor(0, 20);
   display.print(F("Harmony"));
+  display.drawCircle(108, 33, 13, SSD1306_WHITE);
+  display.drawCircle(113, 27, 10, SSD1306_WHITE);
   display.setTextSize(1);  // reset Text Size
   display.setCursor(0, 42);
   display.print(F("Guitar Hero Hack"));
@@ -1228,7 +1228,12 @@ void displayStartUp(int miliSec) {
   display.print(F("."));
   display.print(PATCH_VERSION);
   display.display();
+
+
   delay(miliSec);
+    // Clear the display
+  display.clearDisplay();
+  display.display();
 }
 
 void readPots() {

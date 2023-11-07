@@ -39,7 +39,11 @@ uint8_t muxCommon = 7;
 // ~~~~~~~~~~~~~~~~~~~~~~
 // Main Screen Parameters
 // ~~~~~~~~~~~~~~~~~~~~~~
-uint8_t displayStep = 0;  // 0-Notes 1-Neck  2-bridge
+uint8_t displayStep = 0;        // 0-Notes 1-Neck  2-bridge
+const int MAX_HELD_NOTES = 10;  // Maximum number of held notes
+
+uint8_t heldNotes[MAX_HELD_NOTES] = { 0 };  // Array to store held notes
+int numHeldNotes = 0;                       // Number of currently held notes
 
 // ~~~~~~~~~~~~~~~
 // Menu Parameters
@@ -52,7 +56,7 @@ uint8_t paramUpdated = 0;     // Keep track of when to save
 uint8_t saveChangesFlag = 0;  // Keep track of when to display save changes screen
 // Define constants for LED blinking
 const unsigned long blinkInterval = 450;  // Blink interval in milliseconds
-unsigned long previousMillis = 0;         // Variable to store the last time LED was updated
+unsigned long previousMillisLED = 0;         // Variable to store the last time LED was updated
 
 // ~~~~~~~~~~~~~~~~~~~
 // Selector Parameters
@@ -653,7 +657,6 @@ void handleButtonPress(uint8_t i) {
       }
     }
 
-
     // Change Bridge Up CC
     else if (i == 16 && menuStep == 5) {
       if (selectedCC == 0) {
@@ -911,13 +914,8 @@ void enableMux(uint8_t mux) {
       break;
   }
 }
-const int MAX_HELD_NOTES = 10;  // Maximum number of held notes
 
-uint8_t heldNotes[MAX_HELD_NOTES] = { 0 };  // Array to store held notes
-int numHeldNotes = 0;                       // Number of currently held notes
-
-
-// Change note on the fly if it being held down, will take care of MIDI note off errors
+// Change note on the fly if it being held down, will take care of MIDI note off for any held notes and MIDI on for the updated note value
 void handleHeldNotesWhileTransposing(byte semitones) {
   // Check if any notes are being held
   if (numHeldNotes > 0) {
@@ -940,13 +938,11 @@ void handleHeldNotesWhileTransposing(byte semitones) {
       uint8_t heldNote = heldNotes[i];
       handleButtonPress(heldNote);
     }
-    // Clear the array after handling held notes
-    // numHeldNotes = 0;
   }
   // No held notes, simply update
   else if (numHeldNotes == 0) {
     // This targets changing the entire array at once
-    if (displayStep == 0 && menuStep == 0) {
+    if (displayStep == 0 && menuStep == 0) { // Main display screen
       tuningSelection[selection].transposeAllNotes(semitones);
     }
     // Single Note change
@@ -959,10 +955,10 @@ void handleHeldNotesWhileTransposing(byte semitones) {
 void updateHeldNotes() {
   // Update the array of held notes
   numHeldNotes = 0;
-  // Loop through all notes to see if they are held down 
+  // Loop through all notes to see if they are held down
   for (int i = 0; i <= 9; ++i) {
     if (previousButtonState[i] == 1) {
-      heldNotes[numHeldNotes++] = i; // Index of held button and update array and count
+      heldNotes[numHeldNotes++] = i;  // Index of held button and update array and count
     }
   }
 }
@@ -1177,7 +1173,6 @@ void displaySaveChanges() {
   display.print(F("Start"));
   display.setCursor(68, 30);
   display.print(F("YES"));
-
 }
 
 void readPots() {
@@ -1242,9 +1237,9 @@ void lightMenuLED() {
 
   if (paramUpdated == 1) {
     // Blink the LED
-    if (currentMillis - previousMillis >= blinkInterval) {
+    if (currentMillis - previousMillisLED >= blinkInterval) {
       // Save the current time
-      previousMillis = currentMillis;
+      previousMillisLED = currentMillis;
 
       // Toggle the LED state
       if (digitalRead(menuLED) == HIGH) {

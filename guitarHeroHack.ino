@@ -294,7 +294,7 @@ void setup() {
   display.clearDisplay();  // Clear the display
 
   readPots();
-  displayStartUp(3000);  // Start screen displays name and version info
+  // displayStartUp(3000);  // Start screen displays name and version info
 
   MIDI.begin(MIDI_CHANNEL_OMNI);  // Initialize the Midi Library.
 
@@ -366,10 +366,12 @@ void loop() {
 // ~~~~~~~~~~~~
 // Button Logic
 // ~~~~~~~~~~~~
-// Neck buttons....0-9
-// Strum buttons...10-13       || 10-NeckDown   11-NeckUp     12-BridgeDown     13-BridgeUp
+// Neck buttons..........0-9
+// Strum buttons.........10-13 || 10-NeckDown   11-NeckUp     12-BridgeDown     13-BridgeUp
 // Directional buttons...14-17 || 14-Up    15-Right    16-Down    17-Left
-// Save Button...18
+// Start Button..........18 
+// Select Button.........19
+// Save / Menu Button....20
 void handleButtonPress(uint8_t i) {
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // Send MIDI note on based on the current tuning selection (note, velocity, channel)
@@ -784,7 +786,7 @@ void handleButtonPress(uint8_t i) {
       confirmSave();
     }
     // Make sure menu is toggled on and not in the save screen
-    if (menuStep > 0 && saveChangesFlag == 0) {  // display main screen after save 🐛 hunt
+    if (menuStep > 0) {  // display main screen after save BUG hunt
       // Limit to 1-5
       if (menuStep < 5) {
         menuStep++;
@@ -793,7 +795,7 @@ void handleButtonPress(uint8_t i) {
       }
     }
     // Switch What Info to Display in main screen
-    else if (paramUpdated == 0 && saveChangesFlag == 0) { // display main screen after save 🐛 hunt
+    else if (paramUpdated == 0) { // display main screen after save BUG hunt
       // Limit to 0-2
       if (displayStep < 2) {
         displayStep++;
@@ -810,8 +812,8 @@ void handleButtonPress(uint8_t i) {
       cancelSave();
     }
     // Make sure menu is toggled on and not in the save screen
-    if (saveChangesFlag == 0 || menuStep > 0) { // display main screen after save 🐛 hunt
-      Serial.println("🐛🐛🐛🐛🐛🐛🐛🐛");
+    if (menuStep > 0) { // display main screen after save BUG hunt
+      Serial.println("BUG");
       // Limit to 1-5
       if (menuStep > 1) {
         menuStep--;
@@ -820,7 +822,7 @@ void handleButtonPress(uint8_t i) {
       }
     }
     // Switch what info to display in main screen
-    else if (paramUpdated == 0 && saveChangesFlag == 0) { // display main screen after save 🐛 hunt
+    else if (paramUpdated == 0) { // display main screen after save BUG hunt
       // Limit to 0-2
       if (displayStep > 0) {
         displayStep--;
@@ -830,7 +832,7 @@ void handleButtonPress(uint8_t i) {
     }
   }
   // End Select Button ~~~~~~~~~~~~~~~~
-  // Menu Toggle / Save Button ~~~~~~~~
+  // Save / Menu Button ~~~~~~~~
   if (i == 20) {
     // Exit the save menu without discarding changes
     if (saveChangesFlag == 1 && menuStep >= 0) {
@@ -853,7 +855,7 @@ void handleButtonPress(uint8_t i) {
       }
     }
   }
-  // End Menu Toggle / Save Button ~~~~
+  // End Save / Menu Button ~~~~
 
 
   Serial.print("Button ");

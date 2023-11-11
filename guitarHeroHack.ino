@@ -9,6 +9,8 @@ License:    MIT - https://opensource.org/license/mit/
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+#include <MemoryFree.h>  // Use to check on memory
+
 #include <Wire.h>              // For display
 #include <Adafruit_SSD1306.h>  // For display
 
@@ -109,9 +111,9 @@ private:
   byte bridgeUpOffValue = 60;
   byte bridgeUpOnValue = 60;
 
-  byte bridgeDownCC = 60;  // Volume
-  byte bridgeDownOffValue = 60;
-  byte bridgeDownOnValue = 60;
+  byte bridgeDownCC = 7;  // Volume
+  byte bridgeDownOffValue = 127;
+  byte bridgeDownOnValue = 0;
 
 public:
   // constructor
@@ -294,7 +296,7 @@ void setup() {
   display.clearDisplay();  // Clear the display
 
   readPots();
-  // displayStartUp(3000);  // Start screen displays name and version info
+  displayStartUp(3000);  // Start screen displays name and version info
 
   MIDI.begin(MIDI_CHANNEL_OMNI);  // Initialize the Midi Library.
 
@@ -340,6 +342,9 @@ void setup() {
 // Arduino Loop
 // ~~~~~~~~~~~~
 void loop() {
+  Serial.print("Free Memory: ");
+  Serial.println(freeMemory());
+
   readPots();
   buttonMux();
   updateHeldNotes();
@@ -369,7 +374,7 @@ void loop() {
 // Neck buttons..........0-9
 // Strum buttons.........10-13 || 10-NeckDown   11-NeckUp     12-BridgeDown     13-BridgeUp
 // Directional buttons...14-17 || 14-Up    15-Right    16-Down    17-Left
-// Start Button..........18 
+// Start Button..........18
 // Select Button.........19
 // Save / Menu Button....20
 void handleButtonPress(uint8_t i) {
@@ -795,7 +800,7 @@ void handleButtonPress(uint8_t i) {
       }
     }
     // Switch What Info to Display in main screen
-    else if (paramUpdated == 0) { // display main screen after save BUG hunt
+    else {  //  BUG hunt
       // Limit to 0-2
       if (displayStep < 2) {
         displayStep++;
@@ -812,7 +817,7 @@ void handleButtonPress(uint8_t i) {
       cancelSave();
     }
     // Make sure menu is toggled on and not in the save screen
-    if (menuStep > 0) { // display main screen after save BUG hunt
+    if (menuStep > 0) {  // display main screen after save BUG hunt
       Serial.println("BUG");
       // Limit to 1-5
       if (menuStep > 1) {
@@ -822,7 +827,7 @@ void handleButtonPress(uint8_t i) {
       }
     }
     // Switch what info to display in main screen
-    else if (paramUpdated == 0) { // display main screen after save BUG hunt
+    else {  // BUG hunt
       // Limit to 0-2
       if (displayStep > 0) {
         displayStep--;
@@ -842,8 +847,7 @@ void handleButtonPress(uint8_t i) {
     // Turn on the edit menu
     else if (menuStep == 0) {
       menuStep++;
-    }
-    else {
+    } else {
       // There have been changes to params go to save screen
       if (paramUpdated == 1 && saveChangesFlag == 0) {
         saveChangesFlag = 1;
@@ -949,8 +953,8 @@ void handleHeldNotesWhileTransposing(byte semitones) {
   // Check if any notes are being held
   if (numHeldNotes > 0) {
     for (int i = 0; i < numHeldNotes; ++i) {
-      uint8_t heldNote = heldNotes[i];
-      handleButtonRelease(heldNote);  // Turn off held note
+      // uint8_t heldNote = heldNotes[i];
+      handleButtonRelease(heldNotes[i]);  // Turn off held note
     }
     // This changes the entire array of notes
     if (displayStep == 0 && menuStep == 0) {  // check if on main screen
@@ -964,8 +968,8 @@ void handleHeldNotesWhileTransposing(byte semitones) {
     }
     // Play new notes
     for (int i = 0; i < numHeldNotes; ++i) {
-      uint8_t heldNote = heldNotes[i];
-      handleButtonPress(heldNote);
+      // uint8_t heldNote = heldNotes[i];
+      handleButtonPress(heldNotes[i]);
     }
   }
   // No held notes, simply update
@@ -1205,7 +1209,6 @@ void displaySaveChanges() {
   display.print(F("Menu"));
   display.setCursor(37, 50);
   display.print(F("CANCEL"));
-
 }
 
 void displayStartUp(int miliSec) {
@@ -1233,7 +1236,7 @@ void displayStartUp(int miliSec) {
 
 
   delay(miliSec);
-    // Clear the display
+  // Clear the display
   display.clearDisplay();
   display.display();
 }

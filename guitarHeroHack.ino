@@ -9,25 +9,38 @@ License:    MIT - https://opensource.org/license/mit/
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+
 #include <MemoryFree.h>  // Use to check on memory
 
-#include <Wire.h>              // For display
-#include <Adafruit_SSD1306.h>  // For display
+#include <Wire.h>  // For display
+// #include <Adafruit_SSD1306.h>  // For display
+
+#include "SSD1306Ascii.h"
+#include "SSD1306AsciiWire.h"  // Try different display
+// 0X3C+SA0 - 0x3C or 0x3D
+#define I2C_ADDRESS 0x3C
+SSD1306AsciiWire oled;
+
+// Define proper RST_PIN if required.
+#define RST_PIN -1
+
+
+
 
 #include <MIDI.h>  // Add Midi Library
 
 #include <EEPROM.h>  // To save variables across power cycle
 
-// Define OLED parameters
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
-#define OLED_RESET -1  // Reset pin not used with Pro Micro
+// // Define OLED parameters
+// #define SCREEN_WIDTH 128
+// #define SCREEN_HEIGHT 64
+// #define OLED_RESET -1  // Reset pin not used with Pro Micro
 
-// OLED display address
-#define OLED_I2C_ADDRESS 0x3C
+// // OLED display address
+// #define OLED_I2C_ADDRESS 0x3C
 
-// Create instance of display
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+// // Create instance of display
+// Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // Create an instance of the library with default name, serial port and settings
 MIDI_CREATE_DEFAULT_INSTANCE();
@@ -284,19 +297,28 @@ Tuning tuningSelection[5] = {
 // ~~~~~~~~~~~~~
 void setup() {
   Serial.begin(9600);
+
+  // new display trial
+  Wire.begin();
+  Wire.setClock(400000L);
+  oled.begin(&Adafruit128x64, I2C_ADDRESS, RST_PIN);
+  oled.setFont(System5x7);
+  oled.clear();
+  // new display trial
+
   // Initialize display
-  if (!display.begin(SSD1306_SWITCHCAPVCC, OLED_I2C_ADDRESS)) {
-    Serial.println(F("SSD1306 allocation failed"));
-    for (;;)
-      ;
-  }
-  // Set display text size and color
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.clearDisplay();  // Clear the display
+  // if (!display.begin(SSD1306_SWITCHCAPVCC, OLED_I2C_ADDRESS)) {
+  //   Serial.println(F("SSD1306 allocation failed"));
+  //   for (;;)
+  //     ;
+  // }
+  // // Set display text size and color
+  // display.setTextSize(1);
+  // display.setTextColor(SSD1306_WHITE);
+  // display.clearDisplay();  // Clear the display
 
   readPots();
-  displayStartUp(3000);  // Start screen displays name and version info
+  // displayStartUp(3000);  // Start screen displays name and version info
 
   MIDI.begin(MIDI_CHANNEL_OMNI);  // Initialize the Midi Library.
 
@@ -351,21 +373,21 @@ void loop() {
   lightMenuLED();
   // Edit menu and display menus have different lengths
   if (menuStep > 0) {
-    syncDisplayMenuStep();
+    // syncDisplayMenuStep();
   }
   // Normally the Notes and Velocity will display
   if (displayStep == 0) {
     displayTuningHeader();
     displayNotes();
-    displayVelocity();
+    // displayVelocity();
   } else if (displayStep > 0) {
-    displayEditStrums();
+    // displayEditStrums();
   }
   if (saveChangesFlag == 1) {
-    displaySaveChanges();
+    // displaySaveChanges();
   }
   // Update the display at the end of the loop
-  display.display();
+  // display.display();
 }
 
 // ~~~~~~~~~~~~
@@ -591,6 +613,7 @@ void handleButtonPress(uint8_t i) {
       if (tuningSelection[selection].getHighestNote() <= 115) {
         handleHeldNotesWhileTransposing(12);
         paramUpdated = 1;
+        oled.clear();
       }
     }
     // Right Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -777,6 +800,7 @@ void handleButtonPress(uint8_t i) {
       if (tuningSelection[selection].getLowestNote() >= 12) {
         handleHeldNotesWhileTransposing(-12);
         paramUpdated = 1;
+        oled.clear();
       }
     }
     // Left Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -788,7 +812,7 @@ void handleButtonPress(uint8_t i) {
   if (i == 18) {
     // To confirm Save
     if (saveChangesFlag == 1) {
-      confirmSave();
+      // confirmSave();
     }
     // Make sure menu is toggled on and not in the save screen
     if (menuStep > 0) {  // display main screen after save BUG hunt
@@ -814,7 +838,7 @@ void handleButtonPress(uint8_t i) {
   if (i == 19) {
     // for cancel save function
     if (saveChangesFlag == 1) {
-      cancelSave();
+      // cancelSave();
     }
     // Make sure menu is toggled on and not in the save screen
     if (menuStep > 0) {  // display main screen after save BUG hunt
@@ -1000,246 +1024,247 @@ void updateHeldNotes() {
 // Display Functions 👀
 // ~~~~~~~~~~~~~~~~~~~~
 void displayTuningHeader() {
-  display.clearDisplay();
-  display.setCursor(0, 0);
-  display.print(F("Tuning: "));
-  display.print(selection + 1);
 
-  // Highlight the channel if in the Channel step of the menu
+  oled.setCursor(0, 0);
+  oled.print("Tuning: ");
+  oled.print(selection + 1);
+  //   // Highlight the channel if in the Channel step of the menu
   if (menuStep == 1) {
-    display.setTextColor(BLACK, WHITE);
+    oled.setInvertMode(1);
   }
-  display.print(F(" Channel: "));
-  display.print(tuningSelection[selection].getChannel());
-  display.setTextColor(WHITE, BLACK);  // Reset text color
+  oled.print(" Channel: ");
+  oled.println(tuningSelection[selection].getChannel());
+  oled.setInvertMode(0);  // Reset text color
 }
+
+
 
 void displayNotes() {
   // Highlight the notes if in the Notes step of the menu
   if (menuStep == 2) {
-    display.setTextColor(BLACK, WHITE);
+    oled.setInvertMode(1);
   }
   // Display first set of notes
-  display.setCursor(0, 15);
-  display.print(F(" Notes: "));
-  display.setTextColor(WHITE, BLACK);  // Reset text color
-  display.setCursor(2, 28);
+  oled.println("");
+  oled.println(" Notes: ");
+  oled.setInvertMode(0);  // Reset text color
+  oled.println("");
   for (int i = 0; i < 5; ++i) {
     // Highlight selected note to edit
     if (selectedNote == i && menuStep == 2) {
-      display.setTextColor(BLACK, WHITE);
+      oled.setInvertMode(1);
     }
-    display.print(tuningSelection[selection].getNote(i));
-    display.setTextColor(WHITE, BLACK);  // Reset text color
-    display.print(F(" "));
+    oled.print(tuningSelection[selection].getNote(i));
+    oled.setInvertMode(0);  // Reset text color
+    oled.print(" ");
   }
+  oled.println("");
   // Display second set of notes on next line
-  display.setCursor(2, 42);
   for (int i = 5; i < 10; ++i) {
     // Highlight selected note to edit
     if (selectedNote == i && menuStep == 2) {
-      display.setTextColor(BLACK, WHITE);
+      oled.setInvertMode(1);
     }
-    display.print(tuningSelection[selection].getNote(i));
-    display.setTextColor(WHITE, BLACK);  // Reset text color
-    display.print(F(" "));
+    oled.print(tuningSelection[selection].getNote(i));
+    oled.setInvertMode(0);  // Reset text color
+    oled.print(" ");
   }
 }
 
-void displayVelocity() {
-  // Highlight the velocity if in the Velocity step of the menu
-  if (menuStep == 3) {
-    display.setTextColor(BLACK, WHITE);
-  }
-  display.setCursor(35, 56);
-  display.print(F(" Velocity: "));
-  display.print(tuningSelection[selection].getVelocity());
-  display.setTextColor(WHITE, BLACK);  // Reset text color
-}
+// void displayVelocity() {
+//   // Highlight the velocity if in the Velocity step of the menu
+//   if (menuStep == 3) {
+//     display.setTextColor(BLACK, WHITE);
+//   }
+//   display.setCursor(35, 56);
+//   display.print(F(" Velocity: "));
+//   display.print(tuningSelection[selection].getVelocity());
+//   display.setTextColor(WHITE, BLACK);  // Reset text color
+// }
 
-void displayEditStrums() {
-  display.clearDisplay();
-  displayTuningHeader();
-  display.setCursor(0, 15);
-  if (displayStep == 1) {
-    // Highlight if selected
-    if (selectedCC <= 2 && menuStep >= 4) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F(" Neck Up: "));
-    display.setTextColor(WHITE, BLACK);  // Reset text color
-    display.setCursor(0, 28);
-    // Highlight if selected
-    if (selectedCC == 0 && menuStep >= 4) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F("C: "));
-    display.print(tuningSelection[selection].getNeckUpCC());
-    display.setTextColor(WHITE, BLACK);  // Reset text color
+// void displayEditStrums() {
+//   display.clearDisplay();
+//   displayTuningHeader();
+//   display.setCursor(0, 15);
+//   if (displayStep == 1) {
+//     // Highlight if selected
+//     if (selectedCC <= 2 && menuStep >= 4) {
+//       display.setTextColor(BLACK, WHITE);
+//     }
+//     display.print(F(" Neck Up: "));
+//     display.setTextColor(WHITE, BLACK);  // Reset text color
+//     display.setCursor(0, 28);
+//     // Highlight if selected
+//     if (selectedCC == 0 && menuStep >= 4) {
+//       display.setTextColor(BLACK, WHITE);
+//     }
+//     display.print(F("C: "));
+//     display.print(tuningSelection[selection].getNeckUpCC());
+//     display.setTextColor(WHITE, BLACK);  // Reset text color
 
-    // Highlight if selected
-    if (selectedCC == 1) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F(" X: "));
-    display.print(tuningSelection[selection].getNeckUpOffValue());
-    display.setTextColor(WHITE, BLACK);  // Reset text color
+//     // Highlight if selected
+//     if (selectedCC == 1) {
+//       display.setTextColor(BLACK, WHITE);
+//     }
+//     display.print(F(" X: "));
+//     display.print(tuningSelection[selection].getNeckUpOffValue());
+//     display.setTextColor(WHITE, BLACK);  // Reset text color
 
-    // Highlight if selected
-    if (selectedCC == 2 && menuStep >= 4) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F(" O: "));
-    display.print(tuningSelection[selection].getNeckUpOnValue());
-    display.setTextColor(WHITE, BLACK);  // Reset text color
+//     // Highlight if selected
+//     if (selectedCC == 2 && menuStep >= 4) {
+//       display.setTextColor(BLACK, WHITE);
+//     }
+//     display.print(F(" O: "));
+//     display.print(tuningSelection[selection].getNeckUpOnValue());
+//     display.setTextColor(WHITE, BLACK);  // Reset text color
 
-    display.setCursor(0, 42);
-    // Highlight if selected
-    if (selectedCC > 2 && menuStep >= 4) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F(" Neck Down: "));
-    display.setTextColor(WHITE, BLACK);  // Reset text color
-    display.setCursor(0, 55);
-    // Highlight if selected
-    if (selectedCC == 3 && menuStep >= 4) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F("C: "));
-    display.print(tuningSelection[selection].getNeckDownCC());
-    display.setTextColor(WHITE, BLACK);  // Reset text color
+//     display.setCursor(0, 42);
+//     // Highlight if selected
+//     if (selectedCC > 2 && menuStep >= 4) {
+//       display.setTextColor(BLACK, WHITE);
+//     }
+//     display.print(F(" Neck Down: "));
+//     display.setTextColor(WHITE, BLACK);  // Reset text color
+//     display.setCursor(0, 55);
+//     // Highlight if selected
+//     if (selectedCC == 3 && menuStep >= 4) {
+//       display.setTextColor(BLACK, WHITE);
+//     }
+//     display.print(F("C: "));
+//     display.print(tuningSelection[selection].getNeckDownCC());
+//     display.setTextColor(WHITE, BLACK);  // Reset text color
 
-    // Highlight if selected
-    if (selectedCC == 4 && menuStep >= 4) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F(" X: "));
-    display.print(tuningSelection[selection].getNeckDownOffValue());
-    display.setTextColor(WHITE, BLACK);  // Reset text color
+//     // Highlight if selected
+//     if (selectedCC == 4 && menuStep >= 4) {
+//       display.setTextColor(BLACK, WHITE);
+//     }
+//     display.print(F(" X: "));
+//     display.print(tuningSelection[selection].getNeckDownOffValue());
+//     display.setTextColor(WHITE, BLACK);  // Reset text color
 
-    // Highlight if selected
-    if (selectedCC == 5 && menuStep >= 4) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F(" O: "));
-    display.print(tuningSelection[selection].getNeckDownOnValue());
-    display.setTextColor(WHITE, BLACK);  // Reset text color
+//     // Highlight if selected
+//     if (selectedCC == 5 && menuStep >= 4) {
+//       display.setTextColor(BLACK, WHITE);
+//     }
+//     display.print(F(" O: "));
+//     display.print(tuningSelection[selection].getNeckDownOnValue());
+//     display.setTextColor(WHITE, BLACK);  // Reset text color
 
-  } else if (displayStep == 2) {
-    // Highlight if selected
-    if (selectedCC <= 2 && menuStep >= 4) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F(" Bridge Up: "));
-    display.setTextColor(WHITE, BLACK);  // Reset text color
-    display.setCursor(0, 28);
-    // Highlight if selected
-    if (selectedCC == 0 && menuStep >= 4) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F("C: "));
-    display.print(tuningSelection[selection].getBridgeUpCC());
-    display.setTextColor(WHITE, BLACK);  // Reset text color
+//   } else if (displayStep == 2) {
+//     // Highlight if selected
+//     if (selectedCC <= 2 && menuStep >= 4) {
+//       display.setTextColor(BLACK, WHITE);
+//     }
+//     display.print(F(" Bridge Up: "));
+//     display.setTextColor(WHITE, BLACK);  // Reset text color
+//     display.setCursor(0, 28);
+//     // Highlight if selected
+//     if (selectedCC == 0 && menuStep >= 4) {
+//       display.setTextColor(BLACK, WHITE);
+//     }
+//     display.print(F("C: "));
+//     display.print(tuningSelection[selection].getBridgeUpCC());
+//     display.setTextColor(WHITE, BLACK);  // Reset text color
 
-    // Highlight if selected
-    if (selectedCC == 1 && menuStep >= 4) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F(" X: "));
-    display.print(tuningSelection[selection].getBridgeUpOffValue());
-    display.setTextColor(WHITE, BLACK);  // Reset text color
+//     // Highlight if selected
+//     if (selectedCC == 1 && menuStep >= 4) {
+//       display.setTextColor(BLACK, WHITE);
+//     }
+//     display.print(F(" X: "));
+//     display.print(tuningSelection[selection].getBridgeUpOffValue());
+//     display.setTextColor(WHITE, BLACK);  // Reset text color
 
-    // Highlight if selected
-    if (selectedCC == 2 && menuStep >= 4) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F(" O: "));
-    display.print(tuningSelection[selection].getBridgeUpOnValue());
-    display.setTextColor(WHITE, BLACK);  // Reset text color
+//     // Highlight if selected
+//     if (selectedCC == 2 && menuStep >= 4) {
+//       display.setTextColor(BLACK, WHITE);
+//     }
+//     display.print(F(" O: "));
+//     display.print(tuningSelection[selection].getBridgeUpOnValue());
+//     display.setTextColor(WHITE, BLACK);  // Reset text color
 
-    // Highlight if selected
-    if (selectedCC > 2 && menuStep >= 4) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.setCursor(0, 42);
-    display.print(F(" Bridge Down: "));
-    display.setTextColor(WHITE, BLACK);  // Reset text color
+//     // Highlight if selected
+//     if (selectedCC > 2 && menuStep >= 4) {
+//       display.setTextColor(BLACK, WHITE);
+//     }
+//     display.setCursor(0, 42);
+//     display.print(F(" Bridge Down: "));
+//     display.setTextColor(WHITE, BLACK);  // Reset text color
 
-    display.setCursor(0, 55);
-    // Highlight if selected
-    if (selectedCC == 3 && menuStep >= 4) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F("C: "));
-    display.print(tuningSelection[selection].getBridgeDownCC());
-    display.setTextColor(WHITE, BLACK);  // Reset text color
+//     display.setCursor(0, 55);
+//     // Highlight if selected
+//     if (selectedCC == 3 && menuStep >= 4) {
+//       display.setTextColor(BLACK, WHITE);
+//     }
+//     display.print(F("C: "));
+//     display.print(tuningSelection[selection].getBridgeDownCC());
+//     display.setTextColor(WHITE, BLACK);  // Reset text color
 
-    // Highlight if selected
-    if (selectedCC == 4 && menuStep >= 4) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F(" X: "));
-    display.print(tuningSelection[selection].getBridgeDownOffValue());
-    display.setTextColor(WHITE, BLACK);  // Reset text color
+//     // Highlight if selected
+//     if (selectedCC == 4 && menuStep >= 4) {
+//       display.setTextColor(BLACK, WHITE);
+//     }
+//     display.print(F(" X: "));
+//     display.print(tuningSelection[selection].getBridgeDownOffValue());
+//     display.setTextColor(WHITE, BLACK);  // Reset text color
 
-    // Highlight if selected
-    if (selectedCC == 5 && menuStep >= 4) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F(" O: "));
-    display.print(tuningSelection[selection].getBridgeDownOnValue());
-    display.setTextColor(WHITE, BLACK);  // Reset text color
-  }
-}
+//     // Highlight if selected
+//     if (selectedCC == 5 && menuStep >= 4) {
+//       display.setTextColor(BLACK, WHITE);
+//     }
+//     display.print(F(" O: "));
+//     display.print(tuningSelection[selection].getBridgeDownOnValue());
+//     display.setTextColor(WHITE, BLACK);  // Reset text color
+//   }
+// }
 
-void displaySaveChanges() {
-  display.clearDisplay();
+// void displaySaveChanges() {
+//   display.clearDisplay();
 
-  display.setCursor(5, 0);
-  display.print(F(" Save Changes? "));
-  display.setCursor(0, 20);
-  display.print(F("Select"));
-  display.setCursor(12, 30);
-  display.print(F("NO"));
-  display.setCursor(72, 20);
-  display.print(F("Start"));
-  display.setCursor(77, 30);
-  display.print(F("YES"));
-  display.setCursor(42, 40);
-  display.print(F("Menu"));
-  display.setCursor(37, 50);
-  display.print(F("CANCEL"));
-}
+//   display.setCursor(5, 0);
+//   display.print(F(" Save Changes? "));
+//   display.setCursor(0, 20);
+//   display.print(F("Select"));
+//   display.setCursor(12, 30);
+//   display.print(F("NO"));
+//   display.setCursor(72, 20);
+//   display.print(F("Start"));
+//   display.setCursor(77, 30);
+//   display.print(F("YES"));
+//   display.setCursor(42, 40);
+//   display.print(F("Menu"));
+//   display.setCursor(37, 50);
+//   display.print(F("CANCEL"));
+// }
 
-void displayStartUp(int miliSec) {
-  // Display splash screen for a few seconds
-  display.clearDisplay();
-  display.setTextSize(2);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0, 0);
-  display.print(F("Intuitive"));
-  display.setCursor(0, 20);
-  display.print(F("Harmony"));
-  display.drawCircle(108, 33, 13, SSD1306_WHITE);
-  display.drawCircle(113, 27, 10, SSD1306_WHITE);
-  display.setTextSize(1);  // reset Text Size
-  display.setCursor(0, 42);
-  display.print(F("Guitar Hero Hack"));
-  display.setCursor(0, 55);
-  display.print(F("Version: "));
-  display.print(MAJOR_VERSION);
-  display.print(F("."));
-  display.print(MINOR_VERSION);
-  display.print(F("."));
-  display.print(PATCH_VERSION);
-  display.display();
+// void displayStartUp(int miliSec) {
+//   // Display splash screen for a few seconds
+//   display.clearDisplay();
+//   display.setTextSize(2);
+//   display.setTextColor(SSD1306_WHITE);
+//   display.setCursor(0, 0);
+//   display.print(F("Intuitive"));
+//   display.setCursor(0, 20);
+//   display.print(F("Harmony"));
+//   display.drawCircle(108, 33, 13, SSD1306_WHITE);
+//   display.drawCircle(113, 27, 10, SSD1306_WHITE);
+//   display.setTextSize(1);  // reset Text Size
+//   display.setCursor(0, 42);
+//   display.print(F("Guitar Hero Hack"));
+//   display.setCursor(0, 55);
+//   display.print(F("Version: "));
+//   display.print(MAJOR_VERSION);
+//   display.print(F("."));
+//   display.print(MINOR_VERSION);
+//   display.print(F("."));
+//   display.print(PATCH_VERSION);
+//   display.display();
 
 
-  delay(miliSec);
-  // Clear the display
-  display.clearDisplay();
-  display.display();
-}
+//   delay(miliSec);
+//   // Clear the display
+//   display.clearDisplay();
+//   display.display();
+// }
 
 void readPots() {
   // Read the "5 way" selection Pot, map it and assign it. -1 to sync with index of tuningSelection array
@@ -1258,35 +1283,35 @@ void syncDisplayMenuStep() {
   }
 }
 
-// Save Functions
-void confirmSave() {
-  display.clearDisplay();
-  display.setCursor(0, 26);
-  display.print(F(" Changes Saved! "));
-  display.display();
-  saveTuningToEEPROM(selection);
-  delay(1000);
+// // Save Functions
+// void confirmSave() {
+//   display.clearDisplay();
+//   display.setCursor(0, 26);
+//   display.print(F(" Changes Saved! "));
+//   display.display();
+//   saveTuningToEEPROM(selection);
+//   delay(1000);
 
-  // Reset flags
-  menuStep = 0;
-  saveChangesFlag = 0;
-  paramUpdated = 0;
-  displayStep = 0;
-}
-void cancelSave() {
-  display.clearDisplay();
-  display.setCursor(0, 26);
-  display.print(F(" Changes Canceled! "));
-  display.display();
-  loadTuningFromEEPROM(selection);
-  delay(1000);
+//   // Reset flags
+//   menuStep = 0;
+//   saveChangesFlag = 0;
+//   paramUpdated = 0;
+//   displayStep = 0;
+// }
+// void cancelSave() {
+//   display.clearDisplay();
+//   display.setCursor(0, 26);
+//   display.print(F(" Changes Canceled! "));
+//   display.display();
+//   loadTuningFromEEPROM(selection);
+//   delay(1000);
 
-  // Reset flags
-  menuStep = 0;
-  saveChangesFlag = 0;
-  paramUpdated = 0;
-  displayStep = 0;
-}
+//   // Reset flags
+//   menuStep = 0;
+//   saveChangesFlag = 0;
+//   paramUpdated = 0;
+//   displayStep = 0;
+// }
 
 // Store tuning in EEPROM
 void saveTuningToEEPROM(int selection) {

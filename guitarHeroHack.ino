@@ -9,7 +9,7 @@ License:    MIT - https://opensource.org/license/mit/
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-#include <MemoryFree.h>  // Use to check on memory
+// #include <MemoryFree.h>  // Use to check on memory
 
 #include <Wire.h>              // For display
 #include <Adafruit_SSD1306.h>  // For display
@@ -74,6 +74,7 @@ uint8_t selectedNote = 0;     // Note to edit, based off index
 uint8_t selectedCC = 0;       // CC to edit 0-5 | up 0-2  down 3-5
 uint8_t paramUpdated = 0;     // Keep track of when to save
 uint8_t saveChangesFlag = 0;  // Keep track of when to display save changes screen
+
 // Define constants for LED blinking
 const unsigned long blinkInterval = 450;  // Blink interval in milliseconds
 unsigned long previousMillisLED = 0;      // Variable to store the last time LED was updated
@@ -83,6 +84,13 @@ unsigned long previousMillisLED = 0;      // Variable to store the last time LED
 // ~~~~~~~~~~~~~~~~~~~
 uint8_t selectPot = A1;
 int selection = 0;
+
+// ~~~~~~~~~~~~~~~~~~~
+// Whammy Parameters
+// ~~~~~~~~~~~~~~~~~~~
+uint8_t whammyPot = A2;
+uint8_t whammy = 0;
+
 
 // Array to store the previous state of each button
 uint8_t previousButtonState[24] = { 0 };  // Updated array size
@@ -312,6 +320,7 @@ void setup() {
   pinMode(enableMux2, OUTPUT);
 
   pinMode(selectPot, INPUT_PULLUP);
+  pinMode(whammyPot, INPUT);
 
   pinMode(menuLED, OUTPUT);
 
@@ -342,8 +351,8 @@ void setup() {
 // Arduino Loop
 // ~~~~~~~~~~~~
 void loop() {
-  Serial.print("Free Memory: ");
-  Serial.println(freeMemory());
+  // Serial.print("Free Memory: ");  // Use to check on memory
+  // Serial.println(freeMemory());   // Use to check on memory
 
   readPots();
   buttonMux();
@@ -351,7 +360,7 @@ void loop() {
   lightMenuLED();
   // Edit menu and display menus have different lengths
   if (menuStep > 0) {
-    syncDisplayMenuStep();
+    // syncDisplayMenuStep();
   }
   // Normally the Notes and Velocity will display
   if (displayStep == 0) {
@@ -420,8 +429,7 @@ void handleButtonPress(uint8_t i) {
       if (tuningSelection[selection].getChannel() < 16) {
         tuningSelection[selection].changeChannel(1);
       } else {
-        // Reset to 1 because max of 16 reached
-        tuningSelection[selection].changeChannel(-15);
+        // Do nothing because max of 16 reached
       }
     }
     // Change the velocity up
@@ -601,8 +609,7 @@ void handleButtonPress(uint8_t i) {
       if (tuningSelection[selection].getChannel() > 1) {
         tuningSelection[selection].changeChannel(-1);
       } else {
-        // Reset to 16 because min of 1 reached
-        tuningSelection[selection].changeChannel(15);
+        // Do nothing because min of 1 reached
       }
     }
     // Change the selected note down
@@ -903,7 +910,7 @@ void buttonMux() {
     // Enable the appropriate MUX
     enableMux(i < 8 ? 0 : (i < 16 ? 1 : 2));
 
-    // Control the selector pins based on the binary representation of i (this all chat 😂)
+    // Control the selector pins based on the binary representation of i (this all chatGPT 😂)
     // Checks the least significant bit (LSB) of the variable i. The & operator performs a bitwise AND operation
     digitalWrite(signal0, (i & 0x01) ? HIGH : LOW);
     digitalWrite(signal1, (i & 0x02) ? HIGH : LOW);
@@ -953,7 +960,6 @@ void handleHeldNotesWhileTransposing(byte semitones) {
   // Check if any notes are being held
   if (numHeldNotes > 0) {
     for (int i = 0; i < numHeldNotes; ++i) {
-      // uint8_t heldNote = heldNotes[i];
       handleButtonRelease(heldNotes[i]);  // Turn off held note
     }
     // This changes the entire array of notes
@@ -968,7 +974,6 @@ void handleHeldNotesWhileTransposing(byte semitones) {
     }
     // Play new notes
     for (int i = 0; i < numHeldNotes; ++i) {
-      // uint8_t heldNote = heldNotes[i];
       handleButtonPress(heldNotes[i]);
     }
   }
@@ -1245,6 +1250,29 @@ void readPots() {
   // Read the "5 way" selection Pot, map it and assign it. -1 to sync with index of tuningSelection array
   uint8_t selectVoltage = analogRead(selectPot);
   selection = map(selectVoltage, 15, 215, 1, 5) - 1;
+  // Serial.print("Selection voltage: ");
+  // Serial.println(selectVoltage);
+  // Serial.print("Selection: ");
+  // Serial.println(selection);
+
+  // Read The Whammy Pot and use to adjust the pitch
+  uint8_t whammyVoltage = analogRead(whammyPot);
+  // Try to limit the whammys response to voltage spikes
+  if (whammyVoltage >= 10 && whammyVoltage <= 220) {
+    whammy = map(whammyVoltage, 10, 195, 0, 127);
+    // Limit to 127 to keep within MIDI bounds
+    if (whammy >= 127) {
+      whammy = 127;
+    }
+  } 
+  // Reset the whammy Pot
+  else {
+    whammy = 0;
+  }
+  Serial.print("whammy voltage: ");
+  Serial.println(whammyVoltage);
+  Serial.print("whammy amount: ");
+  Serial.println(whammy);
 }
 
 // This keeps track of the different lengths for the display and edit menu
@@ -1299,8 +1327,7 @@ void loadTuningFromEEPROM(int selection) {
 }
 
 void lightMenuLED() {
-  unsigned long currentMillis = millis();
-
+  unsigned long currentMillis = millis();  //Keep track of time
   if (paramUpdated == 1) {
     // Blink the LED
     if (currentMillis - previousMillisLED >= blinkInterval) {

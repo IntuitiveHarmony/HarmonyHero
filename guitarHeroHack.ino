@@ -320,7 +320,7 @@ void setup() {
   pinMode(enableMux2, OUTPUT);
 
   pinMode(selectPot, INPUT_PULLUP);
-  pinMode(whammyPot, INPUT);
+  pinMode(whammyPot, INPUT_PULLUP);
 
   pinMode(menuLED, OUTPUT);
 
@@ -362,9 +362,9 @@ void loop() {
   buttonMux();
   updateHeldNotes();
   lightMenuLED();
-  // if (whammy > 0) {
-  //   handleWhammy();
-  // }
+  if (whammy > 0) {
+    handleWhammy();
+  }
   // Edit menu and display menus have different lengths
   if (menuStep > 0) {
     syncDisplayMenuStep();
@@ -1039,16 +1039,16 @@ void readPots() {
   // Read the "5 way" selection Pot, map it and assign it. -1 to sync with index of tuningSelection array
   uint8_t selectVoltage = analogRead(selectPot);
   selection = map(selectVoltage, 15, 215, 1, 5) - 1;
-  // Serial.print("Selection voltage: ");
-  // Serial.println(selectVoltage);
-  // Serial.print("Selection: ");
-  // Serial.println(selection);
+  Serial.print("Selection voltage: ");
+  Serial.println(selectVoltage);
+  Serial.print("Selection: ");
+  Serial.println(selection);
 
   // Read The Whammy Pot and use to adjust the pitch
   uint8_t whammyVoltage = analogRead(whammyPot);
   // Try to limit the whammys response to voltage spikes
-  if (whammyVoltage >= 10 && whammyVoltage <= 220) {
-    whammy = map(whammyVoltage, 10, 195, 0, 4096);
+  if (whammyVoltage >= 20 && whammyVoltage <= 220) {
+    whammy = map(whammyVoltage, 20, 195, 0, 4096);
     // Limit to 4096 to keep within MIDI bounds
     if (whammy >= 4096) {
       whammy = 4096;
@@ -1058,10 +1058,10 @@ void readPots() {
   else {
     whammy = 0;
   }
-  // Serial.print("whammy voltage: ");
-  // Serial.println(whammyVoltage);
-  // Serial.print("whammy amount: ");
-  // Serial.println(whammy);
+  Serial.print("whammy voltage: ");
+  Serial.println(whammyVoltage);
+  Serial.print("whammy amount: ");
+  Serial.println(whammy);
 }
 
 void handleWhammy() {

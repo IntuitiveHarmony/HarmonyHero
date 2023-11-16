@@ -42,7 +42,7 @@ Upon seeing 2 old Guitar Hero controllers at the thrift store I decided to pick 
 
 ### Added Display 🤩
 
-Since the fret board on this controller is limited to 10 buttons and a western musical octave is broken down into 12 steps I wanted to give the user the ability to define the notes each button on the on the fret board triggered.  I wanted the user to be able to define other parameters such as MIDI channel, note velocity, continuous controller (CC) and have the ability to store different tunings as well.  The only way that made sense for me to be able to provide this level of functionality and do so effectively was to introduce a display screen into the mix.
+Since the fret board on this controller is limited to 10 buttons I wanted to give the user as much flexibility as possible by providing the ability to define the notes each button on the on the fret board triggered.  I also wanted the user to be able to define other parameters such as MIDI channel, note velocity, continuous controller (CC) and have the ability to store and recall different tunings as well.  The only way that made sense for me to be able to provide this level of functionality and do so effectively was to introduce a display screen into the mix.
 
 
 <img src="images/screenDemo1.gif" alt="Early Screen Demo" width="400"/>
@@ -71,7 +71,7 @@ The Pro Micro only has 16 available input pins, so how do we get the information
 *Pro Micro Pinout*
 
 
-### 🙌  In steps a multiplexer.  
+### 🙌 In steps a multiplexer.  
 
 This integrated circuit (IC) takes input from multiple sources and essentially funnels it into one output, allowing the signal to pass through each channel one at a time.  I used CD74HC4051 multiplexers (MUX) in this build, each one allows for 8 inputs.  Multiplexers can be stacked as well, so I used 3, giving me the ability, in this case, to connect up to 24 buttons to 1 input pin on the Arduino.  
 

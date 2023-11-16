@@ -89,7 +89,7 @@ int selection = 0;
 // Whammy Parameters
 // ~~~~~~~~~~~~~~~~~~~
 uint8_t whammyPot = A2;
-uint8_t whammy = 0;
+int whammy = 0;
 
 
 // Array to store the previous state of each button
@@ -291,7 +291,7 @@ Tuning tuningSelection[5] = {
 // Arduino Setup
 // ~~~~~~~~~~~~~
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(38400);
   // Initialize display
   if (!display.begin(SSD1306_SWITCHCAPVCC, OLED_I2C_ADDRESS)) {
     Serial.println(F("SSD1306 allocation failed"));
@@ -351,6 +351,10 @@ void setup() {
 // Arduino Loop
 // ~~~~~~~~~~~~
 void loop() {
+  // Serial.print("Display: ");
+  // Serial.println(displayStep);
+  // Serial.print("Menu: ");
+  // Serial.println(menuStep);
   // Serial.print("Free Memory: ");  // Use to check on memory
   // Serial.println(freeMemory());   // Use to check on memory
 
@@ -358,9 +362,12 @@ void loop() {
   buttonMux();
   updateHeldNotes();
   lightMenuLED();
+  // if (whammy > 0) {
+  //   handleWhammy();
+  // }
   // Edit menu and display menus have different lengths
   if (menuStep > 0) {
-    // syncDisplayMenuStep();
+    syncDisplayMenuStep();
   }
   // Normally the Notes and Velocity will display
   if (displayStep == 0) {
@@ -463,10 +470,14 @@ void handleButtonPress(uint8_t i) {
         } else {
           // Do nothing because max of 127 reached
         }
-      } else if (selectedCC == 1) {
+      }
+      // Change Neck Up Off Value
+      else if (selectedCC == 1) {
         // limit 0-127
         if (tuningSelection[selection].getNeckUpOffValue() < 127) {
           tuningSelection[selection].setNeckUpOffValue(1);
+          // Send the off CC as it is updated
+          MIDI.sendControlChange(tuningSelection[selection].getNeckUpCC(), tuningSelection[selection].getNeckUpOffValue(), tuningSelection[selection].getChannel());
         } else {
           // Do nothing because max of 127 reached
         }
@@ -494,6 +505,8 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getNeckDownOffValue() < 127) {
           tuningSelection[selection].setNeckDownOffValue(1);
+          // Send the off CC as it is updated
+          MIDI.sendControlChange(tuningSelection[selection].getNeckDownCC(), tuningSelection[selection].getNeckDownOffValue(), tuningSelection[selection].getChannel());
         } else {
           // Do nothing because max of 127 reached
         }
@@ -518,10 +531,14 @@ void handleButtonPress(uint8_t i) {
         } else {
           // Do nothing because max of 127 reached
         }
-      } else if (selectedCC == 1) {
+      }
+      // Change Bridge Up CC
+      else if (selectedCC == 1) {
         // limit 0-127
         if (tuningSelection[selection].getBridgeUpOffValue() < 127) {
           tuningSelection[selection].setBridgeUpOffValue(1);
+          // Send the off CC as it is updated
+          MIDI.sendControlChange(tuningSelection[selection].getBridgeUpCC(), tuningSelection[selection].getBridgeUpOffValue(), tuningSelection[selection].getChannel());
         } else {
           // Do nothing because max of 127 reached
         }
@@ -549,6 +566,8 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getBridgeDownOffValue() < 127) {
           tuningSelection[selection].setBridgeDownOffValue(1);
+          // Send the off CC as it is updated
+          MIDI.sendControlChange(tuningSelection[selection].getBridgeDownCC(), tuningSelection[selection].getBridgeDownOffValue(), tuningSelection[selection].getChannel());
         } else {
           // Do nothing because max of 127 reached
         }
@@ -643,10 +662,14 @@ void handleButtonPress(uint8_t i) {
         } else {
           // Do nothing because min of 0 reached
         }
-      } else if (selectedCC == 1) {
+      }
+      // Change Neck Up Off
+      else if (selectedCC == 1) {
         // limit 0-127
         if (tuningSelection[selection].getNeckUpOffValue() > 0) {
           tuningSelection[selection].setNeckUpOffValue(-1);
+          // Send the off CC as it is updated
+          MIDI.sendControlChange(tuningSelection[selection].getNeckUpCC(), tuningSelection[selection].getNeckUpOffValue(), tuningSelection[selection].getChannel());
         } else {
           // Do nothing because min of 0 reached
         }
@@ -674,6 +697,8 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getNeckDownOffValue() > 0) {
           tuningSelection[selection].setNeckDownOffValue(-1);
+          // Send the off CC as it is updated
+          MIDI.sendControlChange(tuningSelection[selection].getNeckDownCC(), tuningSelection[selection].getNeckDownOffValue(), tuningSelection[selection].getChannel());
         } else {
           // Do nothing because min of 0 reached
         }
@@ -698,10 +723,14 @@ void handleButtonPress(uint8_t i) {
         } else {
           // Do nothing because min of 0 reached
         }
-      } else if (selectedCC == 1) {
+      }
+      // Change Bridge Up Off
+      else if (selectedCC == 1) {
         // limit 0-127
         if (tuningSelection[selection].getBridgeUpOffValue() > 0) {
           tuningSelection[selection].setBridgeUpOffValue(-1);
+          // Send the off CC as it is updated
+          MIDI.sendControlChange(tuningSelection[selection].getBridgeUpCC(), tuningSelection[selection].getBridgeUpOffValue(), tuningSelection[selection].getChannel());
         } else {
           // Do nothing because min of 0 reached
         }
@@ -729,6 +758,8 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getBridgeDownOffValue() > 0) {
           tuningSelection[selection].setBridgeDownOffValue(-1);
+          // Send the off CC as it is updated
+          MIDI.sendControlChange(tuningSelection[selection].getBridgeDownCC(), tuningSelection[selection].getBridgeDownOffValue(), tuningSelection[selection].getChannel());
         } else {
           // Do nothing because min of 0 reached
         }
@@ -1001,6 +1032,120 @@ void updateHeldNotes() {
   }
 }
 
+// ~~~~~~~~~~~~~~~~~~~~~~~
+// Potentiometer Functions
+// ~~~~~~~~~~~~~~~~~~~~~~~
+void readPots() {
+  // Read the "5 way" selection Pot, map it and assign it. -1 to sync with index of tuningSelection array
+  uint8_t selectVoltage = analogRead(selectPot);
+  selection = map(selectVoltage, 15, 215, 1, 5) - 1;
+  // Serial.print("Selection voltage: ");
+  // Serial.println(selectVoltage);
+  // Serial.print("Selection: ");
+  // Serial.println(selection);
+
+  // Read The Whammy Pot and use to adjust the pitch
+  uint8_t whammyVoltage = analogRead(whammyPot);
+  // Try to limit the whammys response to voltage spikes
+  if (whammyVoltage >= 10 && whammyVoltage <= 220) {
+    whammy = map(whammyVoltage, 10, 195, 0, 4096);
+    // Limit to 4096 to keep within MIDI bounds
+    if (whammy >= 4096) {
+      whammy = 4096;
+    }
+  }
+  // Reset the whammy Pot
+  else {
+    whammy = 0;
+  }
+  // Serial.print("whammy voltage: ");
+  // Serial.println(whammyVoltage);
+  // Serial.print("whammy amount: ");
+  // Serial.println(whammy);
+}
+
+void handleWhammy() {
+  MIDI.sendPitchBend(whammy, tuningSelection[selection].getChannel());
+}
+
+// ~~~~~~~~~~~~~~
+// Save Functions
+// ~~~~~~~~~~~~~~
+void confirmSave() {
+  display.clearDisplay();
+  display.setCursor(0, 26);
+  display.print(F(" Changes Saved! "));
+  display.display();
+  saveTuningToEEPROM(selection);
+  delay(1000);
+
+  // Reset flags
+  menuStep = 0;
+  saveChangesFlag = 0;
+  paramUpdated = 0;
+  displayStep = 0;
+}
+
+void cancelSave() {
+  display.clearDisplay();
+  display.setCursor(0, 26);
+  display.print(F(" Changes Canceled! "));
+  display.display();
+  loadTuningFromEEPROM(selection);
+  delay(1000);
+
+  // Reset flags
+  menuStep = 0;
+  saveChangesFlag = 0;
+  paramUpdated = 0;
+  displayStep = 0;
+}
+
+// Store tuning in EEPROM
+void saveTuningToEEPROM(int selection) {
+  EEPROM.put(selection * sizeof(Tuning), tuningSelection[selection]);
+  delay(10);  // Add a delay between EEPROM writes
+}
+// Load tuning from EEPROM
+void loadTuningFromEEPROM(int selection) {
+  EEPROM.get(selection * sizeof(Tuning), tuningSelection[selection]);
+}
+
+void lightMenuLED() {
+  unsigned long currentMillis = millis();  //Keep track of time
+  if (paramUpdated == 1) {
+    // Blink the LED
+    if (currentMillis - previousMillisLED >= blinkInterval) {
+      // Save the current time
+      previousMillisLED = currentMillis;
+
+      // Toggle the LED state
+      if (digitalRead(menuLED) == HIGH) {
+        digitalWrite(menuLED, LOW);
+      } else {
+        digitalWrite(menuLED, HIGH);
+      }
+    }
+  } else if (menuStep > 0) {
+    // Turn on the LED
+    digitalWrite(menuLED, HIGH);
+  } else {
+    // Turn off the LED
+    digitalWrite(menuLED, LOW);
+  }
+}
+
+// This keeps track of the different lengths for the display and edit menu
+void syncDisplayMenuStep() {
+  if (menuStep == 4) {
+    displayStep = 1;
+  } else if (menuStep == 5) {
+    displayStep = 2;
+  } else if (menuStep < 4) {
+    displayStep = 0;
+  }
+}
+
 // ~~~~~~~~~~~~~~~~~~~~
 // Display Functions 👀
 // ~~~~~~~~~~~~~~~~~~~~
@@ -1244,108 +1389,4 @@ void displayStartUp(int miliSec) {
   // Clear the display
   display.clearDisplay();
   display.display();
-}
-
-void readPots() {
-  // Read the "5 way" selection Pot, map it and assign it. -1 to sync with index of tuningSelection array
-  uint8_t selectVoltage = analogRead(selectPot);
-  selection = map(selectVoltage, 15, 215, 1, 5) - 1;
-  // Serial.print("Selection voltage: ");
-  // Serial.println(selectVoltage);
-  // Serial.print("Selection: ");
-  // Serial.println(selection);
-
-  // Read The Whammy Pot and use to adjust the pitch
-  uint8_t whammyVoltage = analogRead(whammyPot);
-  // Try to limit the whammys response to voltage spikes
-  if (whammyVoltage >= 10 && whammyVoltage <= 220) {
-    whammy = map(whammyVoltage, 10, 195, 0, 127);
-    // Limit to 127 to keep within MIDI bounds
-    if (whammy >= 127) {
-      whammy = 127;
-    }
-  } 
-  // Reset the whammy Pot
-  else {
-    whammy = 0;
-  }
-  Serial.print("whammy voltage: ");
-  Serial.println(whammyVoltage);
-  Serial.print("whammy amount: ");
-  Serial.println(whammy);
-}
-
-// This keeps track of the different lengths for the display and edit menu
-void syncDisplayMenuStep() {
-  if (menuStep == 4) {
-    displayStep = 1;
-  } else if (menuStep == 5) {
-    displayStep = 2;
-  } else if (menuStep < 4) {
-    displayStep = 0;
-  }
-}
-
-// Save Functions
-void confirmSave() {
-  display.clearDisplay();
-  display.setCursor(0, 26);
-  display.print(F(" Changes Saved! "));
-  display.display();
-  saveTuningToEEPROM(selection);
-  delay(1000);
-
-  // Reset flags
-  menuStep = 0;
-  saveChangesFlag = 0;
-  paramUpdated = 0;
-  displayStep = 0;
-}
-void cancelSave() {
-  display.clearDisplay();
-  display.setCursor(0, 26);
-  display.print(F(" Changes Canceled! "));
-  display.display();
-  loadTuningFromEEPROM(selection);
-  delay(1000);
-
-  // Reset flags
-  menuStep = 0;
-  saveChangesFlag = 0;
-  paramUpdated = 0;
-  displayStep = 0;
-}
-
-// Store tuning in EEPROM
-void saveTuningToEEPROM(int selection) {
-  EEPROM.put(selection * sizeof(Tuning), tuningSelection[selection]);
-  delay(10);  // Add a delay between EEPROM writes
-}
-// Load tuning from EEPROM
-void loadTuningFromEEPROM(int selection) {
-  EEPROM.get(selection * sizeof(Tuning), tuningSelection[selection]);
-}
-
-void lightMenuLED() {
-  unsigned long currentMillis = millis();  //Keep track of time
-  if (paramUpdated == 1) {
-    // Blink the LED
-    if (currentMillis - previousMillisLED >= blinkInterval) {
-      // Save the current time
-      previousMillisLED = currentMillis;
-
-      // Toggle the LED state
-      if (digitalRead(menuLED) == HIGH) {
-        digitalWrite(menuLED, LOW);
-      } else {
-        digitalWrite(menuLED, HIGH);
-      }
-    }
-  } else if (menuStep > 0) {
-    // Turn on the LED
-    digitalWrite(menuLED, HIGH);
-  } else {
-    // Turn off the LED
-    digitalWrite(menuLED, LOW);
-  }
 }

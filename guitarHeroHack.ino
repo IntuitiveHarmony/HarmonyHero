@@ -38,29 +38,29 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 // ~~~~~~~~~~~~~~~~~~~~~
 // Instrument Parameters
 // ~~~~~~~~~~~~~~~~~~~~~
-const int MAJOR_VERSION = 1;
-const int MINOR_VERSION = 0;
-const int PATCH_VERSION = 0;
+#define MAJOR_VERSION 1
+#define MINOR_VERSION 0
+#define PATCH_VERSION 0
 
 // ~~~~~~~~~~~~~~
 // MUX Parameters
 // ~~~~~~~~~~~~~~
 // signal pins
-uint8_t signal0 = 4;
-uint8_t signal1 = 15;
-uint8_t signal2 = 8;
+#define signal0 4
+#define signal1 15
+#define signal2 8
 // enable pins
-uint8_t enableMux0 = 16;
-uint8_t enableMux1 = 14;
-uint8_t enableMux2 = 10;
+#define enableMux0 16
+#define enableMux1 14
+#define enableMux2 10
 // common signal
-uint8_t muxCommon = 7;
+#define muxCommon 7
 
 // ~~~~~~~~~~~~~~~~~~~~~~
 // Main Screen Parameters
 // ~~~~~~~~~~~~~~~~~~~~~~
-uint8_t displayStep = 0;        // 0-Notes 1-Neck  2-bridge
-const int MAX_HELD_NOTES = 10;  // Maximum number of held notes
+#define MAX_HELD_NOTES 10  // Maximum number of held notes
+uint8_t displayStep = 0;   // 0-Notes 1-Neck  2-bridge
 
 uint8_t heldNotes[MAX_HELD_NOTES] = { 0 };  // Array to store held notes
 int numHeldNotes = 0;                       // Number of currently held notes
@@ -68,7 +68,7 @@ int numHeldNotes = 0;                       // Number of currently held notes
 // ~~~~~~~~~~~~~~~
 // Menu Parameters
 // ~~~~~~~~~~~~~~~
-uint8_t menuLED = 6;
+#define menuLED 6
 uint8_t menuStep = 0;         // 0-Home 1-Channel 2-Notes 3-velocity 4-StrumSwitches
 uint8_t selectedNote = 0;     // Note to edit, based off index
 uint8_t selectedCC = 0;       // CC to edit 0-5 | up 0-2  down 3-5
@@ -76,19 +76,19 @@ uint8_t paramUpdated = 0;     // Keep track of when to save
 uint8_t saveChangesFlag = 0;  // Keep track of when to display save changes screen
 
 // Define constants for LED blinking
-const unsigned long blinkInterval = 450;  // Blink interval in milliseconds
-unsigned long previousMillisLED = 0;      // Variable to store the last time LED was updated
+#define blinkInterval 450             // Blink interval in milliseconds
+unsigned long previousMillisLED = 0;  // Variable to store the last time LED was updated
 
 // ~~~~~~~~~~~~~~~~~~~
 // Selector Parameters
 // ~~~~~~~~~~~~~~~~~~~
-uint8_t selectPot = A1;
+#define selectPot A1
 int selection = 0;
 
 // ~~~~~~~~~~~~~~~~~~~
 // Whammy Parameters
 // ~~~~~~~~~~~~~~~~~~~
-uint8_t whammyPot = A2;
+#define whammyPot A2
 int whammy = 0;
 
 
@@ -303,8 +303,7 @@ void setup() {
   display.setTextColor(SSD1306_WHITE);
   display.clearDisplay();  // Clear the display
 
-  readPots();
-  displayStartUp(3000);  // Start screen displays name and version info
+  readSelectPot();
 
   MIDI.begin(MIDI_CHANNEL_OMNI);  // Initialize the Midi Library.
 
@@ -345,6 +344,7 @@ void setup() {
   for (int i = 0; i < 5; ++i) {
     loadTuningFromEEPROM(i);
   }
+  displayStartUp(3000);  // Start screen displays name and version info
 }
 
 // ~~~~~~~~~~~~
@@ -358,7 +358,8 @@ void loop() {
   // Serial.print("Free Memory: ");  // Use to check on memory
   // Serial.println(freeMemory());   // Use to check on memory
 
-  readPots();
+  readSelectPot();
+  readWhammyPot();
   buttonMux();
   updateHeldNotes();
   lightMenuLED();
@@ -1035,7 +1036,7 @@ void updateHeldNotes() {
 // ~~~~~~~~~~~~~~~~~~~~~~~
 // Potentiometer Functions
 // ~~~~~~~~~~~~~~~~~~~~~~~
-void readPots() {
+void readSelectPot() {
   // Read the "5 way" selection Pot, map it and assign it. -1 to sync with index of tuningSelection array
   uint8_t selectVoltage = analogRead(selectPot);
   selection = map(selectVoltage, 15, 215, 1, 5) - 1;
@@ -1043,20 +1044,23 @@ void readPots() {
   Serial.println(selectVoltage);
   Serial.print("Selection: ");
   Serial.println(selection);
+}
 
+void readWhammyPot() {
   // Read The Whammy Pot and use to adjust the pitch
   uint8_t whammyVoltage = analogRead(whammyPot);
   // Try to limit the whammys response to voltage spikes
-  if (whammyVoltage >= 20 && whammyVoltage <= 220) {
-    whammy = map(whammyVoltage, 20, 195, 0, 4096);
-    // Limit to 4096 to keep within MIDI bounds
-    if (whammy >= 4096) {
-      whammy = 4096;
+  if (whammyVoltage >= 20 || whammyVoltage <= 220) {
+    whammy = map(whammyVoltage, 20, 195, 0, 8000);
+    // Limit to 8000 to keep within MIDI bounds
+    if (whammy >= 8000) {
+      whammy = 8000;
     }
   }
   // Reset the whammy Pot
   else {
     whammy = 0;
+    // handleWhammy();
   }
   Serial.print("whammy voltage: ");
   Serial.println(whammyVoltage);
@@ -1089,7 +1093,7 @@ void confirmSave() {
 void cancelSave() {
   display.clearDisplay();
   display.setCursor(0, 26);
-  display.print(F(" Changes Canceled! "));
+  display.print(F(" Changes Discarded! "));
   display.display();
   loadTuningFromEEPROM(selection);
   delay(1000);
@@ -1347,17 +1351,17 @@ void displaySaveChanges() {
 
   display.setCursor(5, 0);
   display.print(F(" Save Changes? "));
-  display.setCursor(0, 20);
+  display.setCursor(3, 20);
   display.print(F("Select"));
-  display.setCursor(12, 30);
-  display.print(F("NO"));
+  display.setCursor(0, 30);
+  display.print(F("DISCARD"));
   display.setCursor(72, 20);
   display.print(F("Start"));
-  display.setCursor(77, 30);
+  display.setCursor(79, 30);
   display.print(F("YES"));
-  display.setCursor(42, 40);
+  display.setCursor(49, 40);
   display.print(F("Menu"));
-  display.setCursor(37, 50);
+  display.setCursor(44, 50);
   display.print(F("CANCEL"));
 }
 

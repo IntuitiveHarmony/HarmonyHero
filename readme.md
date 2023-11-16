@@ -1,6 +1,14 @@
 # Guitar Hero MIDI Controller
 
-### In this project I use an Arduino Pro Micro to convert a Guitar Hero video game controller into a MIDI controller.
+In this project I use an Arduino Pro Micro to convert a Guitar Hero video game controller into a MIDI controller.
+
+<br>
+
+🔗 MIDI is a protocol that allows electronic or computer based musical instruments to communicate with each other
+
+✅ By completing this conversion the controller be able to control any MIDI enabled synthesizers you happen to have lying around 
+
+❌ After the conversion the controller will loose any functionality associated with the video game Guitar Hero  
 
 <br>
 
@@ -21,7 +29,7 @@
 - [Adafruit_SSD1306 library](https://github.com/adafruit/Adafruit_SSD1306) for display
 - [arduino_midi_library](https://github.com/FortySevenEffects/arduino_midi_library/tree/dev) for MIDI functionality
 - [EEPROM library](https://docs.arduino.cc/learn/built-in-libraries/eeprom) to persist data across power cycle
-- [Custom Code](https://github.com/IntuitiveHarmony/guitarHeroHack/blob/master/buttonMux.ino) hacked together with 💜 by me
+- [Custom Code](https://github.com/IntuitiveHarmony/guitarHeroHack/blob/master/guitarHeroHack.ino) hacked together with 💜 by me
 
 <br>
 
@@ -54,7 +62,7 @@ Since the fret board on this controller is limited to 10 buttons and a western m
 
 ## Circuit Overview
 
-### Question 💭
+### 🤔 I have a question
 
 The Pro Micro only has 16 available input pins, so how do we get the information from all of the 22 buttons individually and still have room for the pots and the screen?  
 
@@ -63,17 +71,23 @@ The Pro Micro only has 16 available input pins, so how do we get the information
 *Pro Micro Pinout*
 
 
-### Answer
+### 🙌  In steps a multiplexer.  
 
-A multiplexer.  
+This integrated circuit (IC) takes input from multiple sources and essentially funnels it into one output, allowing the signal to pass through each channel one at a time.  I used CD74HC4051 multiplexers (MUX) in this build, each one allows for 8 inputs.  Multiplexers can be stacked as well, so I used 3, giving me the ability, in this case, to connect up to 24 buttons to 1 input pin on the Arduino.  
 
 <img src="images/muxFunctionalDiagram.png" alt="Mux Functional Diagram" width="500"/>
 
 <br>
 
-This integrated circuit (IC) allows input from multiple sources and essentially funnels it into one output.  I used CD74HC4051 multiplexers (MUX) in this build, each one allows for 8 inputs.  MUX can be stacked as well, so I used 3 of them giving me the ability to connect up to 24 buttons to 1 input pin on the Arduino.  There is still a cost when it comes to pins with a multiplexer, the signal pins and the enable pin.  The way a multiplexer works is kind of like how a trumpet gets many notes from only three valves, only more simply.  In the case of a CD74HC4051 it uses 3 signal pins in various combinations of HIGH and LOW to allow the signal from each of the 8 channels to individually flow through to the common.  We can then use code to cycle through each channel very quickly.  The last step is enabling and disabling each of the 3 multiplexers via the enable pin, allowing only one to pass the signal at a time.
+There is still a cost when it comes to pins with a multiplexer, the signal pins and the enable pin.  The way a multiplexer works is kind of like how a trumpet gets many notes from only three valves, only more simply.  In the case of a CD74HC4051 it uses 3 signal pins in various combinations of HIGH and LOW to allow the signal from each of the 8 channels to individually flow through to the common.  The next step is enabling and disabling each of the 3 multiplexers via the enable pin, allowing only one to pass the signal at a time.  The following truth table from the [data sheet](https://www.ti.com/lit/ds/symlink/cd74hc4051.pdf?ts=1700162797267&ref_url=https%253A%252F%252Fwww.ti.com%252Fproduct%252FCD74HC4051) helps by breaking down all the possible combinations of the signal and enable pins.  We can then use code to cycle through each channel very quickly.
 
-This functionality is handled by the following two functions.  I relied on chatGPT to help with figuring out the logic for this.  I assure you, it wasn't as if I sat down and asked ol' Chad for some code and just I copy and pasted it.  It was a 6 hour+ back and forth of prompts and then me tweaking the generated code until I had tuned it to function the way I intended.  Here is the product of that session.
+<br>
+
+<img src="images/muxTruthTable.png" alt="Mux Truth Table" width="500"/>
+
+<br>
+
+This rapid switching through each channel is handled by the following two functions.  I relied on chatGPT to help with figuring out the logic for this.  I assure you, it wasn't as if I sat down and asked ol' Chad for some code and just I copy and pasted it.  It was a 6 hour+ back and forth of prompts and then me tweaking the generated code until I had tuned it to function the way I intended.  Here is the product of that session.
 
 
 ```c++

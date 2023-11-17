@@ -56,7 +56,7 @@ Since the fret board on this controller is limited to 10 buttons I wanted to giv
 ## Wiring Diagram
 *This diagram pictures a 4052 IC but the actual circuit uses a 4051*
 
-<img src="images/guitarHackCircuitDiagram.png" alt="Wiring Diagram"/>
+<img src="images/guitarHackCircuitDiagram.jpeg" alt="Wiring Diagram" width="850"/>
 
 <br>
 
@@ -73,7 +73,7 @@ The Pro Micro only has 16 available input pins, so how do we get the information
 
 ### 🙌 In steps a multiplexer.  
 
-This integrated circuit (IC) takes input from multiple sources and essentially funnels it into one output, allowing the signal to pass through each channel one at a time.  I used CD74HC4051 multiplexers (MUX) in this build, each one allows for 8 inputs.  Multiplexers can be stacked as well, so I used 3, giving me the ability, in this case, to connect up to 24 buttons to 1 input pin on the Arduino.  
+The multiplexer takes input from multiple sources and essentially funnels it into one output, allowing the signal to pass through each channel one at a time.  I used CD74HC4051 multiplexers (MUX) in this build, each one allows for 8 inputs.  Multiplexers can be stacked as well, so I used 3, giving me the ability, in this case, to connect up to 24 buttons to 1 input pin on the Arduino.  
 
 <img src="images/muxFunctionalDiagram.png" alt="Mux Functional Diagram" width="500"/>
 

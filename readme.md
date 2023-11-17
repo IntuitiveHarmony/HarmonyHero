@@ -1,10 +1,10 @@
 # Guitar Hero MIDI Controller
 
-In this project I use an Arduino Pro Micro to convert a Guitar Hero video game controller into a MIDI controller.
+### This project utilizes an Arduino Pro Micro to convert a Guitar Hero video game controller into a MIDI controller.
 
 <br>
 
-🔗 MIDI is a protocol that allows electronic or computer based musical instruments to communicate with each other
+🔗 MIDI is a serial protocol that allows electronic or computer based musical instruments to communicate with each other
 
 ✅ By completing this conversion the controller be able to control any MIDI enabled synthesizers you happen to have lying around 
 
@@ -42,7 +42,7 @@ Upon seeing 2 old Guitar Hero controllers at the thrift store I decided to pick 
 
 ### Added Display 🤩
 
-Since the fret board on this controller is limited to 10 buttons I wanted to give the user as much flexibility as possible by providing the ability to define the notes each button on the on the fret board triggered.  I also wanted the user to be able to define other parameters such as MIDI channel, note velocity, continuous controller (CC) and have the ability to store and recall different tunings as well.  The only way that made sense for me to be able to provide this level of functionality and do so effectively was to introduce a display screen into the mix.
+Since the fret board on this controller is limited to 10 buttons I wanted to give the user as much flexibility as possible by providing the ability to define the notes each button on the on the fret board triggered.  I also wanted the user to be able to define other parameters such as MIDI channel, note velocity, continuous controller (CC) and have the ability to store and recall different tunings as well.  The only way that made sense for me to be able to provide this level of functionality and do so effectively was to introduce a display screen into the mix. Later I will cut a small hole in the body of the guitar in order to make it visible in the final build.
 
 
 <img src="images/screenDemo1.gif" alt="Early Screen Demo" width="400"/>
@@ -56,7 +56,7 @@ Since the fret board on this controller is limited to 10 buttons I wanted to giv
 ## Wiring Diagram
 *This diagram pictures a 4052 IC but the actual circuit uses a 4051*
 
-![Wiring Diagram](buttonMux%20Diagram.jpg)
+<img src="images/guitarHackCircuitDiagram.png" alt="Wiring Diagram"/>
 
 <br>
 

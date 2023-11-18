@@ -37,12 +37,18 @@
 
 Upon seeing 2 old Guitar Hero controllers at the thrift store I decided to pick one up and turn it into a MIDI controller.  The goal was to build program to handle the various button presses available and turn them into meaningful MIDI data.  One of the more challenging aspects of this endeavor for me was figuring out a user interface that made sense musically, was easy to interact with and was fun to play while avoiding any heavy modifications to the body of the instrument. 
 
+ 
+
 <img src="images/howItBegan.jpeg" alt="Guitar Hero Controller" width="400"/>
 <img src="images/firstContact.jpeg" alt="Guitar Hero Controller Insides" width="400"/>
 
+### Note Selection 🎶
+
+Since the fret board on this controller is limited to 10 buttons I thought about tuning the instrument to the pentatonic scale, like [Conrad Menchine](https://www.youtube.com/watch?v=obNs_aYCkjY&ab_channel=ConradMenchine) did in a similar project, or like we see in some percussion based diatonic instruments.  I think inspiration can stem from limitations, so my aim was to offer users maximum flexibility while still embracing the constraints of the 10-button fret board.  Instead of restricting the user to a predefined scale provided by me, I included the flexibility for the user to input any 10-note scale. This was achieved by allowing users to define each of the 10 notes triggered by the  buttons on the fret board.  
+
 ### Added Display 🤩
 
-Since the fret board on this controller is limited to 10 buttons I wanted to give the user as much flexibility as possible by providing the ability to define the notes each button on the on the fret board triggered.  I also wanted the user to be able to define other parameters such as MIDI channel, note velocity, continuous controller (CC) and have the ability to store and recall different tunings as well.  The only way that made sense for me to be able to provide this level of functionality and do so effectively was to introduce a display screen into the mix. Later I will cut a small hole in the body of the guitar in order to make it visible in the final build.
+I also wanted the user to be able to define other parameters such as MIDI channel, note velocity, continuous controller (CC) and have the ability to store and recall different tunings as well.  The only way that made sense for me to be able to provide this level of functionality and do so effectively was to introduce a display screen into the mix. Later I will cut a small hole in the body of the guitar in order to make it visible in the final build.
 
 
 <img src="images/screenDemo1.gif" alt="Early Screen Demo" width="400"/>
@@ -92,7 +98,7 @@ The way a multiplexer works is kind of like how a trumpet gets many notes from o
 
 <br>
 
-This rapid switching through each channel is handled by the following two functions.  I relied on chatGPT to help with figuring out the logic for this.  This consisted of a 6 hour+ back and forth of prompts and then me tweaking the generated code until I had tuned it to function the way I intended.  
+This rapid switching through each channel is handled by the following two functions.  I relied on chatGPT to help with figuring out the logic for this.  This consisted of a 6 hour+ back and forth of prompts and then me tweaking the generated code until I had tuned it to perform the way I intended.  
 
 <details>
 <summary>Open if you enjoy looking at code</summary>
@@ -176,7 +182,7 @@ MIDI.sendNoteOff(newNote, velocity, channel);
 There are a few instances in the Guitar Hero Hack where there is the potential for this to happen and was indeed happening so many times during testing.  To help take care of this I implemented the `handleHeldNotesWhileTransposing` function.  It loops through any held notes, triggers their respective `note off`, updates the note by the chosen interval, and then plays the updated note or notes.  This make the instrument the sound of "tuning" it while scrolling through the available semitone and octave interval steps.
 
 <details>
-<summary>This my favorite function of the project, because of the sound it produces when notes are held</summary>
+<summary>This my favorite function of the project, because of the sound it produces when notes are held and transposed at the same time</summary>
 
 ```c++
 // Change note on the fly if it being held down, will take care of MIDI note off for any held notes and MIDI on for the updated note value
@@ -194,7 +200,7 @@ void handleHeldNotesWhileTransposing(byte semitones) {
       }
     }
     // Single Note change
-    else if (menuStep == 2) {                                          // Edit single notes menu selection
+    else if (menuStep == 2) { // Edit single notes menu selection
       tuningSelection[selection].changeNote(selectedNote, semitones);  // update single note in array
     }
     // Play new notes
@@ -224,7 +230,12 @@ void handleHeldNotesWhileTransposing(byte semitones) {
 - **Notes and Volts**, [MIDI for the Arduino - Circuit Analysis](https://www.youtube.com/watch?v=0L7WAMFWSgY&list=PL4_gPbvyebyH2xfPXePHtx8gK5zPBrVkg&ab_channel=NotesandVolts)
 - **Gustavo Silveira**, [musiconerd.com](https://www.musiconerd.com/)
 - **Conrad Menchine**, [Guitar Hero MIDI Controller](https://www.youtube.com/watch?v=obNs_aYCkjY&ab_channel=ConradMenchine)
-- **The Legendary Z**
+
+<br>
+
+## Special Thanks
+
+- **Z** - I'm grateful for your expertise during our debugging sessions. The lessons I learned from you have been invaluable to me while navigating the challenges presented by this project. 
 
 
 ## Contributors
@@ -235,3 +246,5 @@ void handleHeldNotesWhileTransposing(byte semitones) {
 ## License
 
 This project is licensed under the [MIT License](https://opensource.org/license/mit/).
+
+If you see a way to improve this code, please submit a pull request 😎

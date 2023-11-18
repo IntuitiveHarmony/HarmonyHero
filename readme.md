@@ -54,7 +54,6 @@ Since the fret board on this controller is limited to 10 buttons I wanted to giv
 
 
 ## Wiring Diagram
-*This diagram pictures a 4052 IC but the actual circuit uses a 4051*
 
 <img src="images/guitarHackCircuitDiagram.jpeg" alt="Wiring Diagram" width="850"/>
 
@@ -64,14 +63,14 @@ Since the fret board on this controller is limited to 10 buttons I wanted to giv
 
 ### 🤔 I have a question
 
-The Pro Micro only has 16 available input pins, so how do we get the information from all of the 22 buttons individually and still have room for the pots and the screen?  
+The Pro Micro only has 16 available input pins, so how do we get the information from all of the 22 buttons individually and still have room for the potentiometers and the screen?  
 
 <img src="images/proMicroPinout.png" alt="Pro Micro Pinout" width="400"/>
 
 *Pro Micro Pinout*
 
 
-### 🙌 In steps a multiplexer.  
+### 🤚 Multiplexer has an answer  
 
 The multiplexer takes input from multiple sources and essentially funnels it into one output, allowing the signal to pass through each channel one at a time.  I used CD74HC4051 multiplexers (MUX) in this build, each one allows for 8 inputs.  Multiplexers can be stacked as well, so I used 3, giving me the ability, in this case, to connect up to 24 buttons to 1 input pin on the Arduino.  
 
@@ -79,7 +78,13 @@ The multiplexer takes input from multiple sources and essentially funnels it int
 
 <br>
 
-There is still a cost when it comes to pins with a multiplexer, the signal pins and the enable pin.  The way a multiplexer works is kind of like how a trumpet gets many notes from only three valves, only more simply.  In the case of a CD74HC4051 it uses 3 signal pins in various combinations of HIGH and LOW to allow the signal from each of the 8 channels to individually flow through to the common.  The next step is enabling and disabling each of the 3 multiplexers via the enable pin, allowing only one to pass the signal at a time.  The following truth table from the [data sheet](https://www.ti.com/lit/ds/symlink/cd74hc4051.pdf?ts=1700162797267&ref_url=https%253A%252F%252Fwww.ti.com%252Fproduct%252FCD74HC4051) helps by breaking down all the possible combinations of the signal and enable pins.  We can then use code to cycle through each channel very quickly.
+There is still a cost when it comes to pins with a multiplexer, the signal pins and the enable pin. Once the dust settles I can connect up to 24 individual buttons to only 7 pins on the Arduino. 
+
+- 1 common pin (Where the buttons are funneled to)
+- 3 signal pins (To control which button is connected to common)
+- 3 enable pins (To turn each individual MUX on or off completely)
+
+The way a multiplexer works is kind of like how a trumpet gets many notes from only three valves, only more simply.  In the case of a CD74HC4051 it uses 3 signal pins in various combinations of HIGH and LOW to allow the signal from each of the 8 channels to individually flow through to the common.  The next step is enabling and disabling each of the 3 multiplexers via the enable pin, allowing only one to pass the signal at a time.  The following truth table from the [data sheet](https://www.ti.com/lit/ds/symlink/cd74hc4051.pdf?ts=1700162797267&ref_url=https%253A%252F%252Fwww.ti.com%252Fproduct%252FCD74HC4051) helps by breaking down all the possible combinations of the signal and enable pin of a single MUX.  We can then use code to cycle through each channel and MUX individually and very quickly.
 
 <br>
 
@@ -87,8 +92,10 @@ There is still a cost when it comes to pins with a multiplexer, the signal pins 
 
 <br>
 
-This rapid switching through each channel is handled by the following two functions.  I relied on chatGPT to help with figuring out the logic for this.  I assure you, it wasn't as if I sat down and asked ol' Chad for some code and just I copy and pasted it.  It was a 6 hour+ back and forth of prompts and then me tweaking the generated code until I had tuned it to function the way I intended.  Here is the product of that session.
+This rapid switching through each channel is handled by the following two functions.  I relied on chatGPT to help with figuring out the logic for this.  This consisted of a 6 hour+ back and forth of prompts and then me tweaking the generated code until I had tuned it to function the way I intended.  
 
+<details>
+<summary>Open if you enjoy looking at code</summary>
 
 ```c++
 void buttonMux() {
@@ -142,6 +149,7 @@ void enableMux(uint8_t mux) {
   }
 }
 ```
+</details>
 
 <br>
 
@@ -155,7 +163,7 @@ MIDI.sendNoteOff(note, velocity, channel);
 
 ```
 
- Each `note on` will be executed the moment a note key is pressed. The `note off` will be executed once the button is released. The note is a value 0-127 and each correlates with a musical note and is what ties the `note off` to the `note on`. (with me?) 
+ Each `note on` will be executed the moment a note key is pressed. The `note off` will be executed once the button is released. The note is a value 0-127 and each correlates with a musical note and is what ties the `note off` to the `note on`. (still with me?) 
 
  Let's say a function transposes the note while it is being held.  Then something like below will more than likely happen causing the original note to play until it a `note off` is played for that note.  I call them `sticky notes` and they are pretty annoying. Especially when it is high pitched and I cannot make the right `note off` message happen 😵‍💫. 
 
@@ -166,6 +174,9 @@ MIDI.sendNoteOff(newNote, velocity, channel);
 ```  
 
 There are a few instances in the Guitar Hero Hack where there is the potential for this to happen and was indeed happening so many times during testing.  To help take care of this I implemented the `handleHeldNotesWhileTransposing` function.  It loops through any held notes, triggers their respective `note off`, updates the note by the chosen interval, and then plays the updated note or notes.  This make the instrument the sound of "tuning" it while scrolling through the available semitone and octave interval steps.
+
+<details>
+<summary>This my favorite function of the project, because of the sound it produces when notes are held</summary>
 
 ```c++
 // Change note on the fly if it being held down, will take care of MIDI note off for any held notes and MIDI on for the updated note value
@@ -205,12 +216,20 @@ void handleHeldNotesWhileTransposing(byte semitones) {
   }
 }
 ```
+</details>
+
+
+## Resources / Inspiration
+
+- **Notes and Volts**, [MIDI for the Arduino - Circuit Analysis](https://www.youtube.com/watch?v=0L7WAMFWSgY&list=PL4_gPbvyebyH2xfPXePHtx8gK5zPBrVkg&ab_channel=NotesandVolts)
+- **Gustavo Silveira**, [musiconerd.com](https://www.musiconerd.com/)
+- **Conrad Menchine**, [Guitar Hero MIDI Controller](https://www.youtube.com/watch?v=obNs_aYCkjY&ab_channel=ConradMenchine)
+- **The Legendary Z**
 
 
 ## Contributors
 
 - Jason Horst
-- Inspiration from a handful of docs, projects and articles I'm currently looking for the links to.
 - Chat GPT (tedious work, some logic)
 
 ## License

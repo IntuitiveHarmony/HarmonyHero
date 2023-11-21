@@ -44,7 +44,9 @@ Upon seeing 2 old Guitar Hero controllers at the thrift store I decided to pick 
 
 ### Note Selection 🎶
 
-Since the fret board on this controller is limited to 10 buttons I thought about tuning the instrument to the pentatonic scale, like [Conrad Menchine](https://www.youtube.com/watch?v=obNs_aYCkjY&ab_channel=ConradMenchine) did in a similar project, or like we see in some percussion based diatonic instruments.  I think inspiration can stem from limitations, so my aim was to offer users maximum flexibility while still embracing the constraints of the 10-button fret board.  Instead of restricting the user to a predefined scale provided by me, I included the flexibility for the user to input any 10-note scale. This was achieved by allowing users to define each of the 10 notes triggered by the  buttons on the fret board.  
+Given the 10-button limit on this controller's fret board, I was originally thinking of tuning it to a distinctive 5-note scale, perhaps the minor pentatonic scale. Tuning instruments diatonically (limited to notes within one key) is concept is akin to what you find in certain instruments like tank drums, some glockenspiels, percussion blocks.  Sometimes I feel like diatonic tunings can be limiting. 
+
+However, I think inspiration can stem from limitations, so my aim was to offer users maximum flexibility while still embracing the constraints of the 10-button fret board.  Instead of restricting the user to a predefined scale provided by me, I included the flexibility for the user to change each of the 10 notes on the fret board to one of their choice, thus allowing for custom 10 note scales to be input by the user.  
 
 ### Added Display 🤩
 
@@ -156,6 +158,25 @@ void enableMux(uint8_t mux) {
 }
 ```
 </details>
+
+<br>
+
+
+## Maxed Memory
+
+The last time I checked the program memory for this program was at 88%.  Running a program that takes up this much space can sometimes cause issues.  When I was testing an early version of the controller I was facing an issue where the program would freeze, but only when running on 9v battery power.  I was about ready to transfer the code over to an Arduino Mega to try and resolve the issue by using something with more memory. Before I did I rebuilt the test circuit in order to make the transfer to the new board a bit easier.  
+
+To my amazement, the program worked perfectly on 9v power while using the original board. I never even tried the Mega. This was a reminder to myself that sometimes starting afresh can resolve challenges.
+
+<img src="images/originalTestCircuit.jpeg" alt="Original Test Circuit" width="500"/>
+
+*Original test circuit*
+
+<br>
+
+<img src="images/secondTestCircuit.jpeg" alt="Second Test Circuit" width="500"/>
+
+*Rebuilt test circuit*
 
 <br>
 

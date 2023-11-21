@@ -1,6 +1,6 @@
-# Guitar Hero MIDI Controller
+# HarmonyHero
 
-### This project utilizes an Arduino Pro Micro to convert a Guitar Hero video game controller into a MIDI controller.
+### Utilizing an Arduino Pro Micro to convert a Guitar Hero video game controller into a MIDI controller.
 
 <br>
 
@@ -29,7 +29,7 @@
 - [Adafruit_SSD1306 library](https://github.com/adafruit/Adafruit_SSD1306) for display
 - [arduino_midi_library](https://github.com/FortySevenEffects/arduino_midi_library/tree/dev) for MIDI functionality
 - [EEPROM library](https://docs.arduino.cc/learn/built-in-libraries/eeprom) to persist data across power cycle
-- [Custom Code](https://github.com/IntuitiveHarmony/guitarHeroHack/blob/master/guitarHeroHack.ino) hacked together with 💜 by me
+- [Custom Code](https://github.com/IntuitiveHarmony/HarmonyHero/blob/master/HarmonyHero.ino) hacked together with 💜 by me
 
 <br>
 
@@ -63,7 +63,7 @@ I also wanted the user to be able to define other parameters such as MIDI channe
 
 ## Wiring Diagram
 
-<img src="images/guitarHackCircuitDiagram.jpeg" alt="Wiring Diagram" width="850"/>
+<img src="images/harmonyHeroCircuitDiagram.jpeg" alt="Wiring Diagram" width="850"/>
 
 <br>
 
@@ -200,7 +200,7 @@ MIDI.sendNoteOff(newNote, velocity, channel);
 
 ```  
 
-There are a few instances in the Guitar Hero Hack where there is the potential for this to happen and was indeed happening so many times during testing.  To help take care of this I implemented the `handleHeldNotesWhileTransposing` function.  It loops through any held notes, triggers their respective `note off`, updates the note by the chosen interval, and then plays the updated note or notes.  This make the instrument the sound of "tuning" it while scrolling through the available semitone and octave interval steps.
+There are a few instances in the HarmonyHero where there is the potential for this to happen and was indeed happening so many times during testing.  To help take care of this I implemented the `handleHeldNotesWhileTransposing` function.  It loops through any held notes, triggers their respective `note off`, updates the note by the chosen interval, and then plays the updated note or notes.  This make the instrument the sound of "tuning" it while scrolling through the available semitone and octave interval steps.
 
 <details>
 <summary>This my favorite function of the project, because of the sound it produces when notes are held and transposed at the same time</summary>

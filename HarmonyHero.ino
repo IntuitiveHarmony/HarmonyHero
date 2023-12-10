@@ -388,8 +388,6 @@ void handleButtonPress(uint8_t i) {
       // limit 1-16
       if (tuningSelection[selection].getChannel() < 16) {
         tuningSelection[selection].changeChannel(1);
-      } else {
-        // Do nothing because max of 16 reached
       }
     }
     // Change the velocity up
@@ -397,8 +395,6 @@ void handleButtonPress(uint8_t i) {
       // limit 0-127
       if (tuningSelection[selection].getVelocity() < 127) {
         tuningSelection[selection].changeVelocity(1);
-      } else {
-        // Do noting because max of 127 reached
       }
     }
     // Change the selected note up
@@ -408,8 +404,6 @@ void handleButtonPress(uint8_t i) {
         // Change note on the fly if it being held down, will take care of MIDI
         // note off errors
         handleHeldNotesWhileTransposing(1);
-      } else {
-        // Do noting because max of 127 reached
       }
     }
     // ~~~~~~~~~~~~~~~~~~~~~~
@@ -421,8 +415,6 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getNeckUpCC() < 127) {
           tuningSelection[selection].setNeckUpCC(1);
-        } else {
-          // Do nothing because max of 127 reached
         }
       }
       // Change Neck Up Off Value
@@ -434,8 +426,6 @@ void handleButtonPress(uint8_t i) {
           MIDI.sendControlChange(tuningSelection[selection].getNeckUpCC(),
                                  tuningSelection[selection].getNeckUpOffValue(),
                                  tuningSelection[selection].getChannel());
-        } else {
-          // Do nothing because max of 127 reached
         }
       }
       // Change Neck Up On Value
@@ -443,8 +433,6 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getNeckUpOnValue() < 127) {
           tuningSelection[selection].setNeckUpOnValue(1);
-        } else {
-          // Do nothing because max of 127 reached
         }
       }
       // Change Neck Down CC Value
@@ -452,8 +440,6 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getNeckDownCC() < 127) {
           tuningSelection[selection].setNeckDownCC(1);
-        } else {
-          // Do nothing because max of 127 reached
         }
       }
       // Change Neck Down Off Value
@@ -466,8 +452,6 @@ void handleButtonPress(uint8_t i) {
               tuningSelection[selection].getNeckDownCC(),
               tuningSelection[selection].getNeckDownOffValue(),
               tuningSelection[selection].getChannel());
-        } else {
-          // Do nothing because max of 127 reached
         }
       }
       // Change Neck Down On Value
@@ -475,8 +459,6 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getNeckDownOnValue() < 127) {
           tuningSelection[selection].setNeckDownOnValue(1);
-        } else {
-          // Do nothing because max of 127 reached
         }
       }
     }
@@ -487,8 +469,6 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getBridgeUpCC() < 127) {
           tuningSelection[selection].setBridgeUpCC(1);
-        } else {
-          // Do nothing because max of 127 reached
         }
       }
       // Change Bridge Up CC
@@ -501,8 +481,6 @@ void handleButtonPress(uint8_t i) {
               tuningSelection[selection].getBridgeUpCC(),
               tuningSelection[selection].getBridgeUpOffValue(),
               tuningSelection[selection].getChannel());
-        } else {
-          // Do nothing because max of 127 reached
         }
       }
       // Change Bridge Up On Value
@@ -510,8 +488,6 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getBridgeUpOnValue() < 127) {
           tuningSelection[selection].setBridgeUpOnValue(1);
-        } else {
-          // Do nothing because max of 127 reached
         }
       }
       // Change Bridge Down CC Value
@@ -519,8 +495,6 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getBridgeDownCC() < 127) {
           tuningSelection[selection].setBridgeDownCC(1);
-        } else {
-          // Do nothing because max of 127 reached
         }
       }
       // Change Bridge Down Off Value
@@ -533,8 +507,6 @@ void handleButtonPress(uint8_t i) {
               tuningSelection[selection].getBridgeDownCC(),
               tuningSelection[selection].getBridgeDownOffValue(),
               tuningSelection[selection].getChannel());
-        } else {
-          // Do nothing because max of 127 reached
         }
       }
       // Change Bridge Down On Value
@@ -542,8 +514,6 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getBridgeDownOnValue() < 127) {
           tuningSelection[selection].setBridgeDownOnValue(1);
-        } else {
-          // Do nothing because max of 127 reached
         }
       }
     }
@@ -592,8 +562,6 @@ void handleButtonPress(uint8_t i) {
       // limit 1-16
       if (tuningSelection[selection].getChannel() > 1) {
         tuningSelection[selection].changeChannel(-1);
-      } else {
-        // Do nothing because min of 1 reached
       }
     }
     // Change the selected note down
@@ -603,8 +571,6 @@ void handleButtonPress(uint8_t i) {
         // Change note on the fly if it being held down, will take care of MIDI
         // note off errors
         handleHeldNotesWhileTransposing(-1);
-      } else {
-        // Do nothing because min of 0 reached
       }
     }
     // Change the velocity down
@@ -612,8 +578,6 @@ void handleButtonPress(uint8_t i) {
       // limit 0-127
       if (tuningSelection[selection].getVelocity() > 0) {
         tuningSelection[selection].changeVelocity(-1);
-      } else {
-        // Do nothing because min of 0 reached
       }
     }
     // ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -625,8 +589,6 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getNeckUpCC() > 0) {
           tuningSelection[selection].setNeckUpCC(-1);
-        } else {
-          // Do nothing because min of 0 reached
         }
       }
       // Change Neck Up Off
@@ -638,8 +600,6 @@ void handleButtonPress(uint8_t i) {
           MIDI.sendControlChange(tuningSelection[selection].getNeckUpCC(),
                                  tuningSelection[selection].getNeckUpOffValue(),
                                  tuningSelection[selection].getChannel());
-        } else {
-          // Do nothing because min of 0 reached
         }
       }
       // Change Neck Up On Value
@@ -647,8 +607,6 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getNeckUpOnValue() > 0) {
           tuningSelection[selection].setNeckUpOnValue(-1);
-        } else {
-          // Do nothing because min of 0 reached
         }
       }
       // Change Neck Down CC Value
@@ -656,8 +614,6 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getNeckDownCC() > 0) {
           tuningSelection[selection].setNeckDownCC(-1);
-        } else {
-          // Do nothing because min of 0 reached
         }
       }
       // Change Neck Down Off Value
@@ -670,8 +626,6 @@ void handleButtonPress(uint8_t i) {
               tuningSelection[selection].getNeckDownCC(),
               tuningSelection[selection].getNeckDownOffValue(),
               tuningSelection[selection].getChannel());
-        } else {
-          // Do nothing because min of 0 reached
         }
       }
       // Change Neck Down On Value
@@ -679,8 +633,6 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getNeckDownOnValue() > 0) {
           tuningSelection[selection].setNeckDownOnValue(-1);
-        } else {
-          // Do nothing because min of 0 reached
         }
       }
     }
@@ -691,8 +643,6 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getBridgeUpCC() > 0) {
           tuningSelection[selection].setBridgeUpCC(-1);
-        } else {
-          // Do nothing because min of 0 reached
         }
       }
       // Change Bridge Up Off
@@ -705,8 +655,6 @@ void handleButtonPress(uint8_t i) {
               tuningSelection[selection].getBridgeUpCC(),
               tuningSelection[selection].getBridgeUpOffValue(),
               tuningSelection[selection].getChannel());
-        } else {
-          // Do nothing because min of 0 reached
         }
       }
       // Change Bridge Up On Value
@@ -714,8 +662,6 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getBridgeUpOnValue() > 0) {
           tuningSelection[selection].setBridgeUpOnValue(-1);
-        } else {
-          // Do nothing because min of 0 reached
         }
       }
       // Change Bridge Down CC Value
@@ -723,8 +669,6 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getBridgeDownCC() > 0) {
           tuningSelection[selection].setBridgeDownCC(-1);
-        } else {
-          // Do nothing because min of 0 reached
         }
       }
       // Change Bridge Down Off Value
@@ -737,8 +681,6 @@ void handleButtonPress(uint8_t i) {
               tuningSelection[selection].getBridgeDownCC(),
               tuningSelection[selection].getBridgeDownOffValue(),
               tuningSelection[selection].getChannel());
-        } else {
-          // Do nothing because min of 0 reached
         }
       }
       // Change Bridge Down On Value
@@ -746,8 +688,6 @@ void handleButtonPress(uint8_t i) {
         // limit 0-127
         if (tuningSelection[selection].getBridgeDownOnValue() > 0) {
           tuningSelection[selection].setBridgeDownOnValue(-1);
-        } else {
-          // Do nothing because min of 0 reached
         }
       }
     }

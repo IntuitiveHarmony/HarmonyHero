@@ -59,7 +59,7 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 // ~~~~~~~~~~~~~~~~~~~~~~
 // Main Screen Parameters
 // ~~~~~~~~~~~~~~~~~~~~~~
-#define MAX_HELD_NOTES 10  // Maximum number of held notes
+#define MAX_HELD_NOTES 18  // Maximum number of held notes
 uint8_t displayStep = 0;   // 0-Notes 1-Neck  2-bridge
 
 uint8_t heldNotes[MAX_HELD_NOTES] = {0};  // Array to store held notes
@@ -73,13 +73,15 @@ uint8_t menuStep = 0;  // 0-Home 1-Channel 2-Notes 3-velocity 4-StrumSwitches
 uint8_t selectedNote = 0;  // Note to edit, based off index
 uint8_t selectedCC = 0;    // CC to edit 0-5 | up 0-2  down 3-5
 uint8_t paramUpdated = 0;  // Keep track of when to save
-uint8_t saveChangesFlag =
-    0;  // Keep track of when to display save changes screen
+// Keep track of when to display save changes screen
+uint8_t saveChangesFlag = 0;
 
 // Define constants for LED blinking
 #define blinkInterval 450  // Blink interval in milliseconds
-unsigned long previousMillisLED =
-    0;  // Variable to store the last time LED was updated
+// Variable to store the last time LED was updated
+unsigned long previousMillisLED = 0;
+// Variable to store the start time when a Directional button is held
+unsigned long heldButtonTime;
 
 // ~~~~~~~~~~~~~~~~~~~
 // Selector Parameters
@@ -301,6 +303,7 @@ void loop() {
   readWhammyPot();
   buttonMux();
   updateHeldNotes();
+  speedyParams();
   lightMenuLED();
   // if (whammy > 0) {
   //   handleWhammy();
@@ -1006,14 +1009,44 @@ void handleHeldNotesWhileTransposing(byte semitones) {
   }
 }
 
+bool paramHeld = false;
 // Update the array of held notes to help with handleHeldNotesWhileTransposing()
 void updateHeldNotes() {
   numHeldNotes = 0;
   // Loop through all notes to see if they are held down
-  for (int i = 0; i <= 9; ++i) {
+  for (int i = 0; i < MAX_HELD_NOTES; ++i) {
     if (previousButtonState[i] == 1) {
-      heldNotes[numHeldNotes++] =
-          i;  // Index of held button and update array and count
+      // Index of held button and update array and count
+      heldNotes[numHeldNotes++] = i;
+      // Set heldButtonTime only for button indices 14 to 17 (for speedyParams
+      // function)
+      if (i >= 14 && i <= 17 && numHeldNotes >= 1 && !paramHeld) {
+        heldButtonTime = millis();
+        paramHeld = true;
+      }
+    }
+  }
+  // Reset paramHeld if no button is held
+  if (numHeldNotes == 0) {
+    paramHeld = false;
+  }
+}
+
+// When Directional buttons are held down they will update the parameters
+// quickly
+void speedyParams() {
+  // Loop through held notes
+  for (int i = 0; i < numHeldNotes; i++) {
+    // Wait for 1 sec before going fast
+    if (millis() - heldButtonTime >= 400) {
+      // Up button
+      if (heldNotes[i] == 14) {
+        handleButtonPress(14);
+      }
+      // Down button
+      if (heldNotes[i] == 16) {
+        handleButtonPress(16);
+      }
     }
   }
 }

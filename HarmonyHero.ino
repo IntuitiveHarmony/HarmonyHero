@@ -40,7 +40,7 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 // ~~~~~~~~~~~~~~~~~~~~~
 #define MAJOR_VERSION 1
 #define MINOR_VERSION 0
-#define PATCH_VERSION 0
+#define PATCH_VERSION 1
 
 // ~~~~~~~~~~~~~~
 // MUX Parameters
@@ -75,19 +75,22 @@ uint8_t selectedCC = 0;    // CC to edit 0-5 | up 0-2  down 3-5
 uint8_t paramUpdated = 0;  // Keep track of when to save
 // Keep track of when to display save changes screen
 uint8_t saveChangesFlag = 0;
+bool paramHeld =
+    false;  // Keep track of directional buttons being held for speedyParams()
 
 // Define constants for LED blinking
 #define blinkInterval 450  // Blink interval in milliseconds
 // Variable to store the last time LED was updated
 unsigned long previousMillisLED = 0;
 // Variable to store the start time when a Directional button is held
-unsigned long heldButtonTime;
+unsigned long heldParamTime;
 
 // ~~~~~~~~~~~~~~~~~~~
 // Selector Parameters
 // ~~~~~~~~~~~~~~~~~~~
 #define selectPot A1
 int selection = 0;
+int previousSelection = 0;
 
 // ~~~~~~~~~~~~~~~~~~~
 // Whammy Parameters
@@ -292,6 +295,12 @@ void setup() {
 // Arduino Loop
 // ~~~~~~~~~~~~
 void loop() {
+  Serial.print("numHeldNotes: ");
+  Serial.print(numHeldNotes);
+  Serial.print(" Selection: ");
+  Serial.print(selection);
+  Serial.print(" prevSel: ");
+  Serial.println(previousSelection);
   // Serial.print("Display: ");
   // Serial.println(displayStep);
   // Serial.print("Menu: ");
@@ -773,7 +782,6 @@ void handleButtonPress(uint8_t i) {
     }
     // Make sure menu is toggled on and not in the save screen
     if (menuStep > 0) {  // display main screen after save BUG hunt
-      // Serial.println("BUG");
       // Limit to 1-5
       if (menuStep > 1) {
         menuStep--;
@@ -917,9 +925,8 @@ void enableMux(uint8_t mux) {
 void handleHeldNotesWhileTransposing(byte semitones) {
   // Check if any notes are being held
   if (numHeldNotes > 0) {
-    for (int i = 0; i < numHeldNotes; ++i) {
-      handleButtonRelease(heldNotes[i]);  // Turn off held note
-    }
+    turnOffHeldNotes();
+
     // This changes the entire array of notes
     if (displayStep == 0 && menuStep == 0) {  // check if on main screen
       for (int i = 0; i < 10; ++i) {          // loop through all notes
@@ -930,6 +937,8 @@ void handleHeldNotesWhileTransposing(byte semitones) {
     else if (menuStep == 2) {  // Edit single notes menu selection
       tuningSelection[selection].changeNote(
           selectedNote, semitones);  // update single note in array
+      return;  // Keeps the note change from skipping to the end when up or down
+               // is held
     }
     // Play new notes
     for (int i = 0; i < numHeldNotes; ++i) {
@@ -949,25 +958,38 @@ void handleHeldNotesWhileTransposing(byte semitones) {
   }
 }
 
-bool paramHeld = false;
+void turnOffHeldNotes() {
+  Serial.print("Turn off notes!!!!!! ");
+  for (int i = 0; i < numHeldNotes; ++i) {
+    // Limit button release to fret board
+    if (heldNotes[i] >= 0 && heldNotes[i] <= 9) {
+      handleButtonRelease(heldNotes[i]);  // Turn off held note
+    }
+  }
+}
+
 // Update the array of held notes to help with handleHeldNotesWhileTransposing()
 void updateHeldNotes() {
   numHeldNotes = 0;
+
   // Loop through all notes to see if they are held down
   for (int i = 0; i < MAX_HELD_NOTES; ++i) {
     if (previousButtonState[i] == 1) {
       // Index of held button and update array and count
       heldNotes[numHeldNotes++] = i;
-      // Set heldButtonTime only for button indices 14 to 17 (for speedyParams
-      // function)
-      if (i >= 14 && i <= 17 && numHeldNotes >= 1 && !paramHeld) {
-        heldButtonTime = millis();
-        paramHeld = true;
-      }
     }
   }
-  // Reset paramHeld if no button is held
-  if (numHeldNotes == 0) {
+
+  // Check if buttons 14 or 16 are pressed
+  if ((previousButtonState[14] == 1 || previousButtonState[16] == 1) &&
+      !paramHeld) {
+    // Set heldParamTime and paramHeld only once
+    heldParamTime = millis();
+    paramHeld = true;
+  }
+
+  // Reset paramHeld only if buttons 14 and 16 are released
+  if (previousButtonState[14] == 0 && previousButtonState[16] == 0) {
     paramHeld = false;
   }
 }
@@ -975,17 +997,20 @@ void updateHeldNotes() {
 // When Directional buttons are held down they will update the parameters
 // quickly
 void speedyParams() {
-  // Loop through held notes
-  for (int i = 0; i < numHeldNotes; i++) {
-    // Wait for 1 sec before going fast
-    if (millis() - heldButtonTime >= 400) {
-      // Up button
-      if (heldNotes[i] == 14) {
-        handleButtonPress(14);
-      }
-      // Down button
-      if (heldNotes[i] == 16) {
-        handleButtonPress(16);
+  // Use the loop only when directional button is held and in a menu screen
+  if (paramHeld && menuStep > 0) {
+    // Loop through held notes
+    for (int i = 0; i < numHeldNotes; i++) {
+      // Wait for .4 sec before going fast
+      if (millis() - heldParamTime >= 400) {
+        // Up button
+        if (heldNotes[i] == 14) {
+          handleButtonPress(14);
+        }
+        // Down button
+        if (heldNotes[i] == 16) {
+          handleButtonPress(16);
+        }
       }
     }
   }
@@ -998,7 +1023,14 @@ void readSelectPot() {
   // Read the "5 way" selection Pot, map it and assign it. -1 to sync with index
   // of tuningSelection array
   uint8_t selectVoltage = analogRead(selectPot);
-  selection = map(selectVoltage, 15, 215, 1, 5) - 1;
+  int newSelection = map(selectVoltage, 15, 215, 1, 5) - 1;
+  // Turn off any held notes when changing tunings
+  if (previousSelection != newSelection) {
+    turnOffHeldNotes();
+    previousSelection = newSelection;
+  }
+  selection = newSelection;
+
   // Serial.print("Selection voltage: ");
   // Serial.println(selectVoltage);
   // Serial.print("Selection: ");

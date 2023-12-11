@@ -295,8 +295,8 @@ void setup() {
 // Arduino Loop
 // ~~~~~~~~~~~~
 void loop() {
-  Serial.print("numHeldNotes: ");
-  Serial.print(numHeldNotes);
+  Serial.print("menuStep: ");
+  Serial.print(menuStep);
   Serial.print(" Selection: ");
   Serial.print(selection);
   Serial.print(" prevSel: ");
@@ -528,7 +528,7 @@ void handleButtonPress(uint8_t i) {
     }
     // ~~~~~~ End of the UP Arrow CC 👹 ~~~~~~~~~~~~~~~~
     // Transpose all notes one semitone up
-    if (i == 14 && displayStep == 0 && menuStep == 0) {
+    if (i == 14 && menuStep == 0) {
       // check to make sure notes don't go above 127
       if (tuningSelection[selection].getHighestNote() <= 126) {
         handleHeldNotesWhileTransposing(1);
@@ -557,17 +557,16 @@ void handleButtonPress(uint8_t i) {
       }
     }
     // Transpose all notes one Octave up
-    if (i == 15 && displayStep == 0 && menuStep == 0) {
+    if (i == 15 && menuStep == 0) {
       // check to make sure notes don't go above 127
       if (tuningSelection[selection].getHighestNote() <= 115) {
         handleHeldNotesWhileTransposing(12);
-        // paramUpdated = 1;
       }
     }
     // Right Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Down Button ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // change the MIDI channel down
-    else if (i == 16 && menuStep == 1) {
+    if (i == 16 && menuStep == 1) {
       // limit 1-16
       if (tuningSelection[selection].getChannel() > 1) {
         tuningSelection[selection].changeChannel(-1);
@@ -702,11 +701,10 @@ void handleButtonPress(uint8_t i) {
     }
     // ~~~~~~ End of the DOWN Arrow CC 👹 ~~~~~~~~~~~~~~~~
     // Transpose all notes one semitone down
-    if (i == 16 && displayStep == 0 && menuStep == 0) {
+    if (i == 16 && menuStep == 0) {
       // check to make sure notes don't go below 0
       if (tuningSelection[selection].getLowestNote() >= 1) {
         handleHeldNotesWhileTransposing(-1);
-        // paramUpdated = 1;
       }
     }
 
@@ -736,11 +734,10 @@ void handleButtonPress(uint8_t i) {
       }
     }
     // Transpose all notes one octave down
-    if (i == 17 && displayStep == 0 && menuStep == 0) {
+    if (i == 17 && menuStep == 0) {
       // check to make sure notes don't go below 0
       if (tuningSelection[selection].getLowestNote() >= 12) {
         handleHeldNotesWhileTransposing(-12);
-        // paramUpdated = 1;
       }
     }
     // Left Button End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -928,8 +925,8 @@ void handleHeldNotesWhileTransposing(byte semitones) {
     turnOffHeldNotes();
 
     // This changes the entire array of notes
-    if (displayStep == 0 && menuStep == 0) {  // check if on main screen
-      for (int i = 0; i < 10; ++i) {          // loop through all notes
+    if (menuStep == 0) {              // check if on main screen
+      for (int i = 0; i < 10; ++i) {  // loop through all notes
         tuningSelection[selection].changeNote(i, semitones);
       }
     }

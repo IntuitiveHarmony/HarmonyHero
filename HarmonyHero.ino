@@ -945,7 +945,7 @@ void handleHeldNotesWhileTransposing(byte semitones) {
   // No held notes, simply update
   else if (numHeldNotes == 0) {
     // This targets changing the entire array at once
-    if (displayStep == 0 && menuStep == 0) {  // Main display screen
+    if (menuStep == 0) {  // Main display screen
       tuningSelection[selection].transposeAllNotes(semitones);
     }
     // Single Note change
@@ -956,7 +956,6 @@ void handleHeldNotesWhileTransposing(byte semitones) {
 }
 
 void turnOffHeldNotes() {
-  Serial.print("Turn off notes!!!!!! ");
   for (int i = 0; i < numHeldNotes; ++i) {
     // Limit button release to fret board
     if (heldNotes[i] >= 0 && heldNotes[i] <= 9) {

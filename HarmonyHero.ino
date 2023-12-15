@@ -97,6 +97,7 @@ int previousSelection = 0;
 // ~~~~~~~~~~~~~~~~~~~
 #define whammyPot A2
 int whammy = 0;
+int previousWhammy = 0;
 
 // Array to store the previous state of each button
 uint8_t previousButtonState[24] = {0};  // Updated array size
@@ -295,12 +296,12 @@ void setup() {
 // Arduino Loop
 // ~~~~~~~~~~~~
 void loop() {
-  Serial.print("menuStep: ");
-  Serial.print(menuStep);
-  Serial.print(" Selection: ");
-  Serial.print(selection);
-  Serial.print(" prevSel: ");
-  Serial.println(previousSelection);
+  // Serial.print("menuStep: ");
+  // Serial.print(menuStep);
+  // Serial.print(" Selection: ");
+  // Serial.print(selection);
+  // Serial.print(" prevSel: ");
+  // Serial.println(previousSelection);
   // Serial.print("Display: ");
   // Serial.println(displayStep);
   // Serial.print("Menu: ");
@@ -314,9 +315,9 @@ void loop() {
   updateHeldNotes();
   speedyParams();
   lightMenuLED();
-  // if (whammy > 0) {
-  //   handleWhammy();
-  // }
+  if (whammy != previousWhammy) {
+    handleWhammy();
+  }
   // Edit menu and display menus have different lengths
   if (menuStep > 0) {
     syncDisplayMenuStep();
@@ -1020,7 +1021,7 @@ void readSelectPot() {
   // of tuningSelection array
   uint8_t selectVoltage = analogRead(selectPot);
   int newSelection = map(selectVoltage, 15, 215, 1, 5) - 1;
-  // Turn off any held notes when changing tunings
+  // Turn off any held notes and cancel any changes when changing tunings
   if (previousSelection != newSelection) {
     turnOffHeldNotes();
     if (paramUpdated) {
@@ -1037,28 +1038,37 @@ void readSelectPot() {
 }
 
 void readWhammyPot() {
-  // Read The Whammy Pot and use to adjust the pitch
+  previousWhammy = whammy;
+  // Read The Whammy Pot and use it to adjust the pitch
   uint8_t whammyVoltage = analogRead(whammyPot);
+
   // Try to limit the whammy pot's response to voltage spikes
-  if (whammyVoltage >= 20 || whammyVoltage <= 220) {
-    whammy = map(whammyVoltage, 20, 195, 0, 8000);
+  if (whammyVoltage >= 20 && whammyVoltage <= 220) {
+    int newWhammy = map(whammyVoltage, 20, 195, 0, 8000);
+
     // Limit to 8000 to keep within MIDI bounds
-    if (whammy >= 8000) {
-      whammy = 8000;
+    if (newWhammy >= 0 && newWhammy <= 8000) {
+      if (newWhammy != previousWhammy) {
+        whammy = newWhammy;
+        Serial.print("Whammy changed to: ");
+        Serial.print(whammy);
+      }
     }
-  }
-  // Reset the whammy Pot
-  else {
+  } else {
     whammy = 0;
-    // handleWhammy();
   }
-  // Serial.print("whammy voltage: ");
-  // Serial.println(whammyVoltage);
-  // Serial.print("whammy amount: ");
-  // Serial.println(whammy);
+
+  // Print debug information
+  Serial.print(" Whammy voltage: ");
+  Serial.print(whammyVoltage);
+  Serial.print(" whammy: ");
+  Serial.print(whammy);
+  Serial.print(" Previous Whammy: ");
+  Serial.println(previousWhammy);
 }
 
 void handleWhammy() {
+  Serial.print(" --handle Whammy--");
   MIDI.sendPitchBend(whammy, tuningSelection[selection].getChannel());
 }
 

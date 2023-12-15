@@ -1023,6 +1023,9 @@ void readSelectPot() {
   // Turn off any held notes when changing tunings
   if (previousSelection != newSelection) {
     turnOffHeldNotes();
+    if (paramUpdated) {
+      cancelSave();
+    }
     previousSelection = newSelection;
   }
   selection = newSelection;

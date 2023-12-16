@@ -21,9 +21,6 @@
   - [Added Components](#added-components)
 - [Software](#software)
 - [Version History](#version-history)
-  - [1.0.0](#100)
-    - [Features](#features)
-    - [Known Issues](#known-issues)
 - [Background](#background)
   - [Note Selection 🎶](#note-selection-)
   - [Added Display 🤩](#added-display-)
@@ -77,13 +74,7 @@ _May vary based on brand/version of controller_
 
 <br>
 
-## Version History
-
-### 1.0.0
-
-Date: 12/7/23
-
-#### Features
+## Features
 
 - Controls synthesizers and other MIDI instruments
 - Added OLED screen to display parameters
@@ -91,13 +82,43 @@ Date: 12/7/23
 - Permits customization of the MIDI channel and velocity for each tuning
 - Four user-defined CC toggles per tuning controlled by the strum switches
 - Transposition of tuning up/down an octave or semitone with directional button touch
+- Pitch bend up to two semitones by turning potentiometer, knob assembly has spring reset
+
+## Version History
+
+<details>
+<summary>
+1.0.1
+</summary>
+Date: 12/15/23
+
+#### Fixes
+
+- Cancel any changes on current tuning when switching to new tuning
+- Release held notes when changing tunings
+- Whammy feature will reset and respond way better. Is a bit choppy with fast changes
 
 #### Known Issues
 
-- The function `handleHeldNotesWhileTransposing()` will leave sticky notes if a held note is released while the notes are transposed with the directional keys
+- The function `handleHeldNotesWhileTransposing()` will sometimes leave sticky notes if a held note is released while the notes are transposed with the directional keys
+
+<hr>
+<br>
+</details>
+<details>
+<summary>
+1.0.0
+</summary>
+
+Date: 12/7/23
+
+#### Known Issues
+
 - Any held notes will become stuck when switching tunings to another. especially if to another channel
 - Whammy bar does not reset when released to neutral position
 
+<hr>
+</details>
 <br>
 
 ## Background
@@ -313,15 +334,15 @@ void handleHeldNotesWhileTransposing(byte semitones) {
 ## Resources / Inspiration
 
 - **Notes and Volts**, [MIDI for the Arduino - Circuit Analysis](https://www.youtube.com/watch?v=0L7WAMFWSgY&list=PL4_gPbvyebyH2xfPXePHtx8gK5zPBrVkg&ab_channel=NotesandVolts)
+- **minimidi.world**, [A simplified guide to TRS MIDI](https://minimidi.world/)
 - **Gustavo Silveira**, [musiconerd.com](https://www.musiconerd.com/)
 - **Conrad Menchine**, [Guitar Hero MIDI Controller](https://www.youtube.com/watch?v=obNs_aYCkjY&ab_channel=ConradMenchine)
-- **minimidi.world**, [A simplified guide to TRS MIDI](https://minimidi.world/)
 
 <br>
 
 ## Special Thanks
 
-- **Z** - I'm grateful for your expertise during our debugging sessions. The lessons I learned from you have been invaluable to me while navigating the challenges presented by this project.
+- **Z** - I'm grateful for your expertise during our debugging sessions. The lessons I learned from you have been invaluable to me while navigating the challenges presented by this project. Also, thanks for all your work, helping me with the 3D printed battery cover.
 
 ## Contributors
 

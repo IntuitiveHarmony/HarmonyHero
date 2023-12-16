@@ -1050,8 +1050,6 @@ void readWhammyPot() {
     if (newWhammy >= 0 && newWhammy <= 8000) {
       if (newWhammy != previousWhammy) {
         whammy = newWhammy;
-        Serial.print("Whammy changed to: ");
-        Serial.print(whammy);
       }
     }
   } else {
@@ -1059,12 +1057,12 @@ void readWhammyPot() {
   }
 
   // Print debug information
-  Serial.print(" Whammy voltage: ");
-  Serial.print(whammyVoltage);
-  Serial.print(" whammy: ");
-  Serial.print(whammy);
-  Serial.print(" Previous Whammy: ");
-  Serial.println(previousWhammy);
+  // Serial.print(" Whammy voltage: ");
+  // Serial.print(whammyVoltage);
+  // Serial.print(" whammy: ");
+  // Serial.print(whammy);
+  // Serial.print(" Previous Whammy: ");
+  // Serial.println(previousWhammy);
 }
 
 void handleWhammy() {

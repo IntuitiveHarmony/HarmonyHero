@@ -419,16 +419,42 @@ void handleButtonPress(uint8_t i) {
     // ~~~~~~~~~~~~~~~~~~~~~~
     // Up Arrow CC Monster 👹
     // ~~~~~~~~~~~~~~~~~~~~~~
-    // Change Neck Up CC
+    // Change Neck Down CC
     else if (i == 14 && menuStep == 4) {
       if (selectedCC == 0) {
+        // limit 0-127
+        if (tuningSelection[selection].getNeckDownCC() < 127) {
+          tuningSelection[selection].setNeckDownCC(1);
+        }
+      }
+      // Change Neck Down Off Value
+      else if (selectedCC == 1) {
+        // limit 0-127
+        if (tuningSelection[selection].getNeckDownOffValue() < 127) {
+          tuningSelection[selection].setNeckDownOffValue(1);
+          // Send the off CC as it is Updated
+          MIDI.sendControlChange(
+              tuningSelection[selection].getNeckDownCC(),
+              tuningSelection[selection].getNeckDownOffValue(),
+              tuningSelection[selection].getChannel());
+        }
+      }
+      // Change Neck Down On Value
+      else if (selectedCC == 2) {
+        // limit 0-127
+        if (tuningSelection[selection].getNeckDownOnValue() < 127) {
+          tuningSelection[selection].setNeckDownOnValue(1);
+        }
+      }
+      // Change Neck Up CC Value
+      else if (selectedCC == 3) {
         // limit 0-127
         if (tuningSelection[selection].getNeckUpCC() < 127) {
           tuningSelection[selection].setNeckUpCC(1);
         }
       }
       // Change Neck Up Off Value
-      else if (selectedCC == 1) {
+      else if (selectedCC == 4) {
         // limit 0-127
         if (tuningSelection[selection].getNeckUpOffValue() < 127) {
           tuningSelection[selection].setNeckUpOffValue(1);
@@ -439,50 +465,50 @@ void handleButtonPress(uint8_t i) {
         }
       }
       // Change Neck Up On Value
-      else if (selectedCC == 2) {
+      else if (selectedCC == 5) {
         // limit 0-127
         if (tuningSelection[selection].getNeckUpOnValue() < 127) {
           tuningSelection[selection].setNeckUpOnValue(1);
         }
       }
-      // Change Neck Down CC Value
-      else if (selectedCC == 3) {
+    }
+
+    // Change Bridge Down CC
+    else if (i == 14 && menuStep == 5) {
+      if (selectedCC == 0) {
         // limit 0-127
-        if (tuningSelection[selection].getNeckDownCC() < 127) {
-          tuningSelection[selection].setNeckDownCC(1);
+        if (tuningSelection[selection].getBridgeDownCC() < 127) {
+          tuningSelection[selection].setBridgeDownCC(1);
         }
       }
-      // Change Neck Down Off Value
-      else if (selectedCC == 4) {
+      // Change Bridge Down CC
+      else if (selectedCC == 1) {
         // limit 0-127
-        if (tuningSelection[selection].getNeckDownOffValue() < 127) {
-          tuningSelection[selection].setNeckDownOffValue(1);
-          // Send the off CC as it is updated
+        if (tuningSelection[selection].getBridgeDownOffValue() < 127) {
+          tuningSelection[selection].setBridgeDownOffValue(1);
+          // Send the off CC as it is Updated
           MIDI.sendControlChange(
-              tuningSelection[selection].getNeckDownCC(),
-              tuningSelection[selection].getNeckDownOffValue(),
+              tuningSelection[selection].getBridgeDownCC(),
+              tuningSelection[selection].getBridgeDownOffValue(),
               tuningSelection[selection].getChannel());
         }
       }
-      // Change Neck Down On Value
-      else if (selectedCC == 5) {
+      // Change Bridge Down On Value
+      else if (selectedCC == 2) {
         // limit 0-127
-        if (tuningSelection[selection].getNeckDownOnValue() < 127) {
-          tuningSelection[selection].setNeckDownOnValue(1);
+        if (tuningSelection[selection].getBridgeDownOnValue() < 127) {
+          tuningSelection[selection].setBridgeDownOnValue(1);
         }
       }
-    }
-
-    // Change Bridge Up CC
-    else if (i == 14 && menuStep == 5) {
-      if (selectedCC == 0) {
+      // Change Bridge Up CC Value
+      else if (selectedCC == 3) {
         // limit 0-127
         if (tuningSelection[selection].getBridgeUpCC() < 127) {
           tuningSelection[selection].setBridgeUpCC(1);
         }
       }
-      // Change Bridge Up CC
-      else if (selectedCC == 1) {
+      // Change Bridge Up Off Value
+      else if (selectedCC == 4) {
         // limit 0-127
         if (tuningSelection[selection].getBridgeUpOffValue() < 127) {
           tuningSelection[selection].setBridgeUpOffValue(1);
@@ -494,36 +520,10 @@ void handleButtonPress(uint8_t i) {
         }
       }
       // Change Bridge Up On Value
-      else if (selectedCC == 2) {
+      else if (selectedCC == 5) {
         // limit 0-127
         if (tuningSelection[selection].getBridgeUpOnValue() < 127) {
           tuningSelection[selection].setBridgeUpOnValue(1);
-        }
-      }
-      // Change Bridge Down CC Value
-      else if (selectedCC == 3) {
-        // limit 0-127
-        if (tuningSelection[selection].getBridgeDownCC() < 127) {
-          tuningSelection[selection].setBridgeDownCC(1);
-        }
-      }
-      // Change Bridge Down Off Value
-      else if (selectedCC == 4) {
-        // limit 0-127
-        if (tuningSelection[selection].getBridgeDownOffValue() < 127) {
-          tuningSelection[selection].setBridgeDownOffValue(1);
-          // Send the off CC as it is updated
-          MIDI.sendControlChange(
-              tuningSelection[selection].getBridgeDownCC(),
-              tuningSelection[selection].getBridgeDownOffValue(),
-              tuningSelection[selection].getChannel());
-        }
-      }
-      // Change Bridge Down On Value
-      else if (selectedCC == 5) {
-        // limit 0-127
-        if (tuningSelection[selection].getBridgeDownOnValue() < 127) {
-          tuningSelection[selection].setBridgeDownOnValue(1);
         }
       }
     }
@@ -592,16 +592,42 @@ void handleButtonPress(uint8_t i) {
     // ~~~~~~~~~~~~~~~~~~~~~~~~
     // Down Arrow CC Monster 👹
     // ~~~~~~~~~~~~~~~~~~~~~~~~
-    // Change Neck Up CC
+    // Change Neck Down CC
     else if (i == 16 && menuStep == 4) {
       if (selectedCC == 0) {
+        // limit 0-127
+        if (tuningSelection[selection].getNeckDownCC() > 0) {
+          tuningSelection[selection].setNeckDownCC(-1);
+        }
+      }
+      // Change Neck Down Off
+      else if (selectedCC == 1) {
+        // limit 0-127
+        if (tuningSelection[selection].getNeckDownOffValue() > 0) {
+          tuningSelection[selection].setNeckDownOffValue(-1);
+          // Send the off CC as it is Updated
+          MIDI.sendControlChange(
+              tuningSelection[selection].getNeckDownCC(),
+              tuningSelection[selection].getNeckDownOffValue(),
+              tuningSelection[selection].getChannel());
+        }
+      }
+      // Change Neck Down On Value
+      else if (selectedCC == 2) {
+        // limit 0-127
+        if (tuningSelection[selection].getNeckDownOnValue() > 0) {
+          tuningSelection[selection].setNeckDownOnValue(-1);
+        }
+      }
+      // Change Neck Up CC Value
+      else if (selectedCC == 3) {
         // limit 0-127
         if (tuningSelection[selection].getNeckUpCC() > 0) {
           tuningSelection[selection].setNeckUpCC(-1);
         }
       }
-      // Change Neck Up Off
-      else if (selectedCC == 1) {
+      // Change Neck Up Off Value
+      else if (selectedCC == 4) {
         // limit 0-127
         if (tuningSelection[selection].getNeckUpOffValue() > 0) {
           tuningSelection[selection].setNeckUpOffValue(-1);
@@ -612,50 +638,50 @@ void handleButtonPress(uint8_t i) {
         }
       }
       // Change Neck Up On Value
-      else if (selectedCC == 2) {
+      else if (selectedCC == 5) {
         // limit 0-127
         if (tuningSelection[selection].getNeckUpOnValue() > 0) {
           tuningSelection[selection].setNeckUpOnValue(-1);
         }
       }
-      // Change Neck Down CC Value
-      else if (selectedCC == 3) {
+    }
+
+    // Change Bridge Down CC
+    else if (i == 16 && menuStep == 5) {
+      if (selectedCC == 0) {
         // limit 0-127
-        if (tuningSelection[selection].getNeckDownCC() > 0) {
-          tuningSelection[selection].setNeckDownCC(-1);
+        if (tuningSelection[selection].getBridgeDownCC() > 0) {
+          tuningSelection[selection].setBridgeDownCC(-1);
         }
       }
-      // Change Neck Down Off Value
-      else if (selectedCC == 4) {
+      // Change Bridge Down Off
+      else if (selectedCC == 1) {
         // limit 0-127
-        if (tuningSelection[selection].getNeckDownOffValue() > 0) {
-          tuningSelection[selection].setNeckDownOffValue(-1);
-          // Send the off CC as it is updated
+        if (tuningSelection[selection].getBridgeDownOffValue() > 0) {
+          tuningSelection[selection].setBridgeDownOffValue(-1);
+          // Send the off CC as it is Updated
           MIDI.sendControlChange(
-              tuningSelection[selection].getNeckDownCC(),
-              tuningSelection[selection].getNeckDownOffValue(),
+              tuningSelection[selection].getBridgeDownCC(),
+              tuningSelection[selection].getBridgeDownOffValue(),
               tuningSelection[selection].getChannel());
         }
       }
-      // Change Neck Down On Value
-      else if (selectedCC == 5) {
+      // Change Bridge Down On Value
+      else if (selectedCC == 2) {
         // limit 0-127
-        if (tuningSelection[selection].getNeckDownOnValue() > 0) {
-          tuningSelection[selection].setNeckDownOnValue(-1);
+        if (tuningSelection[selection].getBridgeDownOnValue() > 0) {
+          tuningSelection[selection].setBridgeDownOnValue(-1);
         }
       }
-    }
-
-    // Change Bridge Up CC
-    else if (i == 16 && menuStep == 5) {
-      if (selectedCC == 0) {
+      // Change Bridge Up CC Value
+      else if (selectedCC == 3) {
         // limit 0-127
         if (tuningSelection[selection].getBridgeUpCC() > 0) {
           tuningSelection[selection].setBridgeUpCC(-1);
         }
       }
-      // Change Bridge Up Off
-      else if (selectedCC == 1) {
+      // Change Bridge Up Off Value
+      else if (selectedCC == 4) {
         // limit 0-127
         if (tuningSelection[selection].getBridgeUpOffValue() > 0) {
           tuningSelection[selection].setBridgeUpOffValue(-1);
@@ -667,36 +693,10 @@ void handleButtonPress(uint8_t i) {
         }
       }
       // Change Bridge Up On Value
-      else if (selectedCC == 2) {
+      else if (selectedCC == 5) {
         // limit 0-127
         if (tuningSelection[selection].getBridgeUpOnValue() > 0) {
           tuningSelection[selection].setBridgeUpOnValue(-1);
-        }
-      }
-      // Change Bridge Down CC Value
-      else if (selectedCC == 3) {
-        // limit 0-127
-        if (tuningSelection[selection].getBridgeDownCC() > 0) {
-          tuningSelection[selection].setBridgeDownCC(-1);
-        }
-      }
-      // Change Bridge Down Off Value
-      else if (selectedCC == 4) {
-        // limit 0-127
-        if (tuningSelection[selection].getBridgeDownOffValue() > 0) {
-          tuningSelection[selection].setBridgeDownOffValue(-1);
-          // Send the off CC as it is updated
-          MIDI.sendControlChange(
-              tuningSelection[selection].getBridgeDownCC(),
-              tuningSelection[selection].getBridgeDownOffValue(),
-              tuningSelection[selection].getChannel());
-        }
-      }
-      // Change Bridge Down On Value
-      else if (selectedCC == 5) {
-        // limit 0-127
-        if (tuningSelection[selection].getBridgeDownOnValue() > 0) {
-          tuningSelection[selection].setBridgeDownOnValue(-1);
         }
       }
     }
@@ -1218,43 +1218,11 @@ void displayEditStrums() {
     if (selectedCC <= 2 && menuStep >= 4) {
       display.setTextColor(BLACK, WHITE);
     }
-    display.print(F(" Neck Up: "));
+    display.print(F(" Neck Down: "));
     display.setTextColor(WHITE, BLACK);  // Reset text color
     display.setCursor(0, 28);
     // Highlight if selected
     if (selectedCC == 0 && menuStep >= 4) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F("C: "));
-    display.print(tuningSelection[selection].getNeckUpCC());
-    display.setTextColor(WHITE, BLACK);  // Reset text color
-
-    // Highlight if selected
-    if (selectedCC == 1) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F(" X: "));
-    display.print(tuningSelection[selection].getNeckUpOffValue());
-    display.setTextColor(WHITE, BLACK);  // Reset text color
-
-    // Highlight if selected
-    if (selectedCC == 2 && menuStep >= 4) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F(" O: "));
-    display.print(tuningSelection[selection].getNeckUpOnValue());
-    display.setTextColor(WHITE, BLACK);  // Reset text color
-
-    display.setCursor(0, 42);
-    // Highlight if selected
-    if (selectedCC > 2 && menuStep >= 4) {
-      display.setTextColor(BLACK, WHITE);
-    }
-    display.print(F(" Neck Down: "));
-    display.setTextColor(WHITE, BLACK);  // Reset text color
-    display.setCursor(0, 55);
-    // Highlight if selected
-    if (selectedCC == 3 && menuStep >= 4) {
       display.setTextColor(BLACK, WHITE);
     }
     display.print(F("C: "));
@@ -1262,7 +1230,7 @@ void displayEditStrums() {
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
     // Highlight if selected
-    if (selectedCC == 4 && menuStep >= 4) {
+    if (selectedCC == 1) {
       display.setTextColor(BLACK, WHITE);
     }
     display.print(F(" X: "));
@@ -1270,18 +1238,50 @@ void displayEditStrums() {
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
     // Highlight if selected
-    if (selectedCC == 5 && menuStep >= 4) {
+    if (selectedCC == 2 && menuStep >= 4) {
       display.setTextColor(BLACK, WHITE);
     }
     display.print(F(" O: "));
     display.print(tuningSelection[selection].getNeckDownOnValue());
+    display.setTextColor(WHITE, BLACK);  // Reset text color
+
+    display.setCursor(0, 42);
+    // Highlight if selected
+    if (selectedCC > 2 && menuStep >= 4) {
+      display.setTextColor(BLACK, WHITE);
+    }
+    display.print(F(" Neck Up: "));
+    display.setTextColor(WHITE, BLACK);  // Reset text color
+    display.setCursor(0, 55);
+    // Highlight if selected
+    if (selectedCC == 3 && menuStep >= 4) {
+      display.setTextColor(BLACK, WHITE);
+    }
+    display.print(F("C: "));
+    display.print(tuningSelection[selection].getNeckUpCC());
+    display.setTextColor(WHITE, BLACK);  // Reset text color
+
+    // Highlight if selected
+    if (selectedCC == 4 && menuStep >= 4) {
+      display.setTextColor(BLACK, WHITE);
+    }
+    display.print(F(" X: "));
+    display.print(tuningSelection[selection].getNeckUpOffValue());
+    display.setTextColor(WHITE, BLACK);  // Reset text color
+
+    // Highlight if selected
+    if (selectedCC == 5 && menuStep >= 4) {
+      display.setTextColor(BLACK, WHITE);
+    }
+    display.print(F(" O: "));
+    display.print(tuningSelection[selection].getNeckUpOnValue());
     display.setTextColor(WHITE, BLACK);  // Reset text color
   } else if (displayStep == 2) {
     // Highlight if selected
     if (selectedCC <= 2 && menuStep >= 4) {
       display.setTextColor(BLACK, WHITE);
     }
-    display.print(F(" Bridge Up: "));
+    display.print(F(" Bridge Down: "));
     display.setTextColor(WHITE, BLACK);  // Reset text color
     display.setCursor(0, 28);
     // Highlight if selected
@@ -1289,7 +1289,7 @@ void displayEditStrums() {
       display.setTextColor(BLACK, WHITE);
     }
     display.print(F("C: "));
-    display.print(tuningSelection[selection].getBridgeUpCC());
+    display.print(tuningSelection[selection].getBridgeDownCC());
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
     // Highlight if selected
@@ -1297,7 +1297,7 @@ void displayEditStrums() {
       display.setTextColor(BLACK, WHITE);
     }
     display.print(F(" X: "));
-    display.print(tuningSelection[selection].getBridgeUpOffValue());
+    display.print(tuningSelection[selection].getBridgeDownOffValue());
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
     // Highlight if selected
@@ -1305,7 +1305,7 @@ void displayEditStrums() {
       display.setTextColor(BLACK, WHITE);
     }
     display.print(F(" O: "));
-    display.print(tuningSelection[selection].getBridgeUpOnValue());
+    display.print(tuningSelection[selection].getBridgeDownOnValue());
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
     // Highlight if selected
@@ -1313,7 +1313,7 @@ void displayEditStrums() {
       display.setTextColor(BLACK, WHITE);
     }
     display.setCursor(0, 42);
-    display.print(F(" Bridge Down: "));
+    display.print(F(" Bridge Up: "));
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
     display.setCursor(0, 55);
@@ -1322,7 +1322,7 @@ void displayEditStrums() {
       display.setTextColor(BLACK, WHITE);
     }
     display.print(F("C: "));
-    display.print(tuningSelection[selection].getBridgeDownCC());
+    display.print(tuningSelection[selection].getBridgeUpCC());
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
     // Highlight if selected
@@ -1330,7 +1330,7 @@ void displayEditStrums() {
       display.setTextColor(BLACK, WHITE);
     }
     display.print(F(" X: "));
-    display.print(tuningSelection[selection].getBridgeDownOffValue());
+    display.print(tuningSelection[selection].getBridgeUpOffValue());
     display.setTextColor(WHITE, BLACK);  // Reset text color
 
     // Highlight if selected
@@ -1338,7 +1338,7 @@ void displayEditStrums() {
       display.setTextColor(BLACK, WHITE);
     }
     display.print(F(" O: "));
-    display.print(tuningSelection[selection].getBridgeDownOnValue());
+    display.print(tuningSelection[selection].getBridgeUpOnValue());
     display.setTextColor(WHITE, BLACK);  // Reset text color
   }
 }

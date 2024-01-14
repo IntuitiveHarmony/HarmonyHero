@@ -1,12 +1,18 @@
 /*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 File:       HarmonyHero.ino
 Author:     Jason Horst
 Company:    Intuitive Harmony - https://github.com/IntuitiveHarmony
 Date:       November 6, 2023
-Purpose:    Using a Guitar Hero controller and Arduino microcontroller to build
-a MIDI Controller License:    MIT - https://opensource.org/license/mit/
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Purpose:    Converting a Guitar Hero controller into a MIDI controller using an
+Arduino microcontroller
+
+License:    MIT - https://opensource.org/license/mit/
+
+This software may be freely used, modified, and distributed for any
+purpose. The only requirement being the inclusion of this original copyright
+notice and disclaimer.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
 // #include <MemoryFree.h>  // Use to check on memory
@@ -75,8 +81,9 @@ uint8_t selectedCC = 0;    // CC to edit 0-5 | up 0-2  down 3-5
 uint8_t paramUpdated = 0;  // Keep track of when to save
 // Keep track of when to display save changes screen
 uint8_t saveChangesFlag = 0;
-bool paramHeld =
-    false;  // Keep track of directional buttons being held for speedyParams()
+
+// Keep track of directional buttons being held for speedyParams()
+bool paramHeld = false;
 
 // Define constants for LED blinking
 #define blinkInterval 450  // Blink interval in milliseconds

@@ -340,9 +340,11 @@ void handleHeldNotesWhileTransposing(byte semitones) {
 
 <br>
 
-## Special Thanks
+## Thanks
 
-- **Z** - I'm grateful for your expertise during our debugging sessions. The lessons I learned from you have been invaluable to me while navigating the challenges presented by this project. Also, thanks for all your work, helping me with the 3D printed battery cover.
+- [JP](https://github.com/BoognishSaves) - For all the conversations and testing that made this project more rounded
+
+- **Z** - For your expertise during our debugging sessions. The lessons I learned from you have been invaluable to me while navigating the challenges presented by this project. Also, thanks for all your work, helping me with the 3D printed battery cover.
 
 ## Contributors
 

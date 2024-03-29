@@ -1,8 +1,10 @@
 # HarmonyHero
 
-### Utilizing an Arduino Pro Micro to convert a Guitar Hero video game controller into a MIDI controller.
+### Utilizing an Arduino Pro Micro to convert a Guitar Hero style video game controller into a MIDI controller.
 
-<img src="images/welcomeScreen.jpeg" alt="Guitar Hero Controller" width="250"/>
+<br>
+
+✨ [Live Demo](https://youtu.be/Pi3ivdWhib0?si=JtICMj6n6GDKvUco)
 
 <br>
 
@@ -11,6 +13,10 @@
 ✅ By completing this conversion the controller be able to control any MIDI enabled synthesizers you happen to have lying around
 
 ❌ After the conversion the controller will loose any functionality associated with the video game Guitar Hero
+
+<br>
+
+<img src="images/welcomeScreen.jpeg" alt="Guitar Hero Controller" width="250"/>
 
 <br>
 
@@ -31,7 +37,7 @@
 - [Maxed Memory](#maxed-memory)
 - [A word about MIDI](#a-word-about-midi)
 - [Resources / Inspiration](#resources--inspiration)
-- [Special Thanks](#special-thanks)
+- [Personal Thanks](#personal-thanks)
 - [Contributors](#contributors)
 - [License](#license)
 
@@ -340,11 +346,11 @@ void handleHeldNotesWhileTransposing(byte semitones) {
 
 <br>
 
-## Thanks
+## Personal Thanks
 
 - [JP](https://github.com/BoognishSaves) - For all the conversations and testing that made this project more rounded
 
-- **Z** - For your expertise during our debugging sessions. The lessons I learned from you have been invaluable to me while navigating the challenges presented by this project. Also, thanks for all your work, helping me with the 3D printed battery cover.
+- [Z](https://github.com/zeusthedrone) - For your expertise during our debugging sessions. The lessons I learned from you have been invaluable to me while navigating the challenges presented by this project. Also, thanks for all your work, helping me with the 3D printed battery cover.
 
 ## Contributors
 
@@ -356,3 +362,5 @@ void handleHeldNotesWhileTransposing(byte semitones) {
 This project is licensed under the [MIT License](https://opensource.org/license/mit/).
 
 If you see a way to improve this code, please submit a pull request 😎
+
+<br>
